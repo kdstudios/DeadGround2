@@ -50,8 +50,11 @@
       <p class="sub">Minesweeper Adventure meets the zombie apocalypse</p>
       <button id="m-new" class="big">New Game</button>
       <button id="m-continue" class="big" disabled>Continue</button>
+      <button id="m-load" class="big">Load Game</button>
+      <button id="m-quick" class="big">Quick Play</button>
+      <button id="m-how" class="big ghost">How to play</button>
       <button id="m-options" class="big">Options</button>
-      <p class="small">Phase 3 &middot; safehouse &amp; survival</p>
+      <p class="small">Your game saves automatically on this device.</p>
     </div>
   </div>
 
@@ -96,6 +99,61 @@
       <p id="r-extra" class="sub"></p>
       <button id="r-again" class="big"></button>
       <button id="r-menu" class="big">Main menu</button>
+    </div>
+  </div>
+
+  <!-- Load Game -->
+  <div id="load" class="screen" hidden>
+    <div class="card">
+      <h2>Load Game</h2>
+      <p id="l-summary" class="sub"></p>
+      <button id="l-load" class="big">Load this save</button>
+      <p class="small">Back up or move your save: copy the code below, or paste a code to restore it.</p>
+      <textarea id="l-code" rows="4" spellcheck="false" placeholder="Save code"></textarea>
+      <button id="l-export" class="big ghost">Copy save code</button>
+      <button id="l-import" class="big ghost">Restore from code</button>
+      <p id="l-msg" class="small"></p>
+      <button id="l-back" class="big ghost">Back</button>
+    </div>
+  </div>
+
+  <!-- How to play -->
+  <div id="how" class="screen scroll" hidden>
+    <div class="sh-wrap how">
+      <h2>How to play</h2>
+      <h3>Expeditions</h3>
+      <ul>
+        <li><b>Tap</b> a square to walk there and uncover it. <b>Numbers</b> count the hidden hazards (mines, zombies, SWAT-proof traps) in the 8 squares around them.</li>
+        <li><b>Hold</b> a covered square, then slide <b>up to reveal</b> or <b>down to flag</b>. Drag to look around the map.</li>
+        <li>Zombies need <b>ammo</b>. Armoured SWAT zombies patrol and only <b>explosives</b> stop them. Planks need a <b>crowbar</b>, locked doors a <b>key</b>, cracked walls an explosive.</li>
+        <li>Mines hurt but never end the run on their own. <b>Shields</b> absorb hits, <b>medkits</b> heal, <b>maps</b> reveal fog.</li>
+        <li>Walk to the <b>open manhole</b> to escape. Loot only counts if you get out.</li>
+        <li>Sealed <b>vault rooms</b> hold extra loot. A lock or terminal minigame opens the door: one attempt only, and failing jams it for good. Always optional.</li>
+      </ul>
+      <h3>Safehouse</h3>
+      <ul>
+        <li>Each day you have <b>stamina</b>: Safe costs 1, Scouting 2, Risky 3.</li>
+        <li>Rescue <b>survivors</b> for passive perks. Everyone eats 1 food per night, and survivors leave if food runs out.</li>
+        <li>Spend scrap and materials on <b>facilities</b>: Storage, Garden, Workshop, Radio, Armoury, Barricades, Watchtower.</li>
+      </ul>
+      <h3>Night</h3>
+      <ul>
+        <li>Zombies march on the safehouse door through the gates. Stand where you like (tap to move), tap a damaged gate to repair it, and tap a tower to choose its archer.</li>
+        <li>Runners are fast but weak, brutes are slow and tough. Losing a night costs some supplies, never the save.</li>
+      </ul>
+      <button id="how-back" class="big">Back</button>
+    </div>
+  </div>
+
+  <!-- Quick Play -->
+  <div id="quick" class="screen" hidden>
+    <div class="card">
+      <h2>Quick Play</h2>
+      <p class="sub">A one-off expedition in a random region. Nothing is saved and your safehouse isn't touched, so winning or dying means nothing.</p>
+      <button class="big qdiff" data-diff="safe">Easy</button>
+      <button class="big qdiff" data-diff="scouting">Medium</button>
+      <button class="big qdiff" data-diff="risky">Hard</button>
+      <button id="q-back" class="big ghost">Back</button>
     </div>
   </div>
 

@@ -27,7 +27,16 @@ interface Rect {
   w: number;
   h: number;
 }
+export type BuildingKind = 'house' | 'store' | 'warehouse' | 'clinic';
+const KIND_LOOT: Record<BuildingKind, string[]> = {
+  house: ['s', 'f', 't'],
+  store: ['f', 'f', 'f', 's', 't'],
+  warehouse: ['t', 't', 't', 's', 's', 'f'],
+  clinic: ['f', 'f', 's', 's', 't'],
+};
+
 interface Building extends Rect {
+  kind: BuildingKind;
   rooms: Rect[];
   /** Cells in the outer wall that lead outside (first = main entrance). */
   entrances: Pos[];
@@ -167,12 +176,17 @@ function build(P: DifficultyParams, rng: Rng): Built | null {
     if (rx >= 0 && x < rx + 3 && x + w > rx - 2) continue; // keep the fence line and its gap clear
     const nearPt = (p: Pos): boolean => p.x >= x - 3 && p.x < x + w + 3 && p.y >= y - 3 && p.y < y + h + 3;
     if (nearPt(start) || nearPt(exit)) continue;
-    buildings.push({ ...r, rooms: [], entrances: [], doorways: [] });
+    buildings.push({ ...r, kind: 'house', rooms: [], entrances: [], doorways: [] });
   }
   if (buildings.length < P.buildings) return null;
   // Order buildings by distance to the start so the first ones are the "free" starter houses.
   const bc = (b: Building): Pos => ({ x: b.x + (b.w >> 1), y: b.y + (b.h >> 1) });
   buildings.sort((a, b) => cheb(bc(a), start) - cheb(bc(b), start));
+  // Building types only colour what the loot inside is; the layout is identical, so solvability is untouched.
+  buildings.forEach((b, i) => {
+    const area = b.w * b.h;
+    b.kind = i < P.freeBuildings ? 'house' : area >= 70 ? 'warehouse' : rng.pick<BuildingKind>(['house', 'store', 'clinic', 'house']);
+  });
 
   buildings.forEach((b, bi) => {
     // walls + interior
@@ -397,6 +411,12 @@ function build(P: DifficultyParams, rng: Rng): Built | null {
   // loot: two thirds inside the buildings (the reward for exploring them), the rest out in the open
   const inLoot = indoorCells.length ? Math.round(P.loot * 0.66) : 0;
   for (let i = 0; i < P.loot; i++) putAt(i < inLoot ? indoorCells : outdoorCells, rng.pick(['s', 'f', 't']));
+  // re-roll loot found indoors by the type of building it sits in
+  for (const c of indoorCells) {
+    if (!'sft'.includes(at(c.x, c.y))) continue;
+    const b = buildings.find((q) => c.x >= q.x && c.x < q.x + q.w && c.y >= q.y && c.y < q.y + q.h);
+    if (b) grid[c.y]![c.x] = rng.pick(KIND_LOOT[b.kind]);
+  }
 
   // ── mines: open ground and building interiors. Never touching (not even diagonally: touching mines make
   //    ambiguous clues), never plugging a doorway, clear around start / exit / doors ──

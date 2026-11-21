@@ -223,12 +223,15 @@ export class NightRenderer {
         y: z.y,
         draw: () => {
           const frame = Math.floor(this.clock * 3 + z.id) % 4;
-          const px = this.sx(z.x) - T * 0.0, py = this.sy(z.y) - T * 0.2;
+          const big = z.kind === 'brute' ? 1.35 : z.kind === 'runner' ? 0.92 : 1;
+          const size = T * big;
+          const px = this.sx(z.x) - (size - T) / 2, py = this.sy(z.y) - T * 0.2 - (size - T);
           this.shadow(this.sx(z.x) + T / 2, this.sy(z.y) + T * 0.9);
-          if (z.hit > 0) ctx.filter = 'brightness(2.2)';
-          this.img(`zombie_${DIRS[z.dir]}_${frame}`, px, py, T, T);
+          const tint = z.kind === 'brute' ? 'sepia(1) saturate(2.4) hue-rotate(-35deg) brightness(0.8)' : z.kind === 'runner' ? 'hue-rotate(70deg) saturate(1.7) brightness(1.1)' : 'none';
+          ctx.filter = z.hit > 0 ? 'brightness(2.2)' : tint;
+          this.img(`zombie_${DIRS[z.dir]}_${z.kind === 'runner' ? Math.floor(this.clock * 6 + z.id) % 4 : frame}`, px, py, size, size);
           ctx.filter = 'none';
-          if (z.hp < 3) this.bar(this.sx(z.x) + T * 0.2, this.sy(z.y) - T * 0.2, T * 0.6, z.hp / 3, '#e0503c', 4);
+          if (z.hp < z.maxHp) this.bar(this.sx(z.x) + T * 0.2, this.sy(z.y) - T * 0.2 - (size - T), T * 0.6, z.hp / z.maxHp, '#e0503c', 4);
         },
       });
     }

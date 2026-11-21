@@ -16,8 +16,10 @@ import {
 } from './core/base.js';
 import { CONFIG } from './core/config.js';
 import { Level } from './core/level.js';
+import { generateAsync } from './gen/async.js';
+import type { LevelData } from './core/level.js';
+import type { LevelSnapshot } from './core/level.js';
 import { REGIONS, type Difficulty, type Region } from './gen/difficulty.js';
-import { generateExpedition } from './gen/generate.js';
 import { expedition1Data } from './levels/expedition1.js';
 import { Renderer } from './render/renderer.js';
 import { SpriteStore } from './render/sprites.js';
@@ -70,7 +72,7 @@ class Game {
   }
 
   /** What is being played, so Retry can replay the same map and Next can roll a new one. */
-  private run: { kind: 'test' } | { kind: 'gen'; difficulty: Difficulty; seed: number; region: Region } = { kind: 'test' };
+  private run: { kind: 'test' } | { kind: 'gen' | 'quick'; difficulty: Difficulty; seed: number; region: Region } = { kind: 'test' };
 
   /** Start a freshly generated expedition (random seed unless one is given). */
   startGenerated(difficulty: Difficulty, seed = Math.floor(Math.random() * 1_000_000) + 1, region: Region = this.region): void {
@@ -82,21 +84,76 @@ class Game {
       this.persist();
     } else this.kit = undefined;
     this.run = { kind: 'gen', difficulty, seed, region };
-    // Generation (and its guess-free check) can take a moment on Risky: show a message first.
+    this.launch();
+  }
+
+  /** The generated map for the current run (kept so Restart reuses it). */
+  private saveTimer = 0;
+  private mapData: LevelData | null = null;
+  private pendingSnap: LevelSnapshot | null = null;
+
+  /** Generate the map in a worker (Risky can take seconds), then start. */
+  /** Keep a snapshot of the expedition in the save so a reload or closed tab does not lose the run. */
+  private autosaveExpedition(dt: number, force = false): void {
+    const l = this.level;
+    const b = this.base;
+    if (!l || !b || this.run.kind !== 'gen') return;
+    if (l.status !== 'playing') {
+      if (b.expedition) {
+        b.expedition = null; // the run is decided: it can no longer be resumed
+        this.persist();
+      }
+      return;
+    }
+    this.saveTimer += dt;
+    if (!force && this.saveTimer < 2) return;
+    this.saveTimer = 0;
+    b.expedition = { difficulty: this.run.difficulty, seed: this.run.seed, region: this.run.region, snap: l.snapshot() };
+    this.persist();
+  }
+
+  private launch(): void {
+    if (this.run.kind === 'test') return this.start();
     const note = $('loading');
     note.textContent = 'Surveying the wasteland…';
     note.hidden = false;
-    window.setTimeout(() => {
+    const r = this.run;
+    void generateAsync(r.difficulty, r.seed, r.region).then((d) => {
+      this.mapData = d;
       this.start();
       note.hidden = true;
-    }, 30);
+    });
+  }
+
+  /** Quick Play: a throwaway expedition in a random region. Nothing is spent, banked or saved. */
+  startQuick(difficulty: Difficulty): void {
+    const regions = Object.keys(REGIONS) as Region[];
+    this.kit = undefined;
+    this.run = { kind: 'quick', difficulty, seed: Math.floor(Math.random() * 1_000_000) + 1, region: regions[Math.floor(Math.random() * regions.length)]! };
+    this.launch();
+  }
+
+  /** Pick an interrupted expedition back up (the page was reloaded or closed mid-run). */
+  private resumeExpedition(): void {
+    const e = this.base?.expedition;
+    if (!e) return;
+    this.kit = undefined;
+    this.pendingSnap = e.snap as LevelSnapshot;
+    this.run = { kind: 'gen', difficulty: e.difficulty, seed: e.seed, region: e.region as Region };
+    this.launch();
   }
 
   start(): void {
     this.level = new Level(
-      this.run.kind === 'gen' ? generateExpedition(this.run.difficulty, this.run.seed, this.run.region).data : expedition1Data(),
+      this.run.kind === 'test' ? expedition1Data() : this.mapData!,
       this.run.kind === 'gen' ? this.kit : undefined,
     );
+    if (this.pendingSnap) {
+      if (!this.level.restore(this.pendingSnap)) this.level = new Level(this.mapData!, undefined);
+      this.pendingSnap = null;
+    }
+    this.saveTimer = 0;
+    if (this.run.kind === 'gen') this.autosaveExpedition(0, true);
     $('btn-restart').hidden = this.run.kind === 'gen';
     this.renderer.recenter();
     this.flagMode = false;
@@ -106,7 +163,7 @@ class Game {
     this.renderer.resize();
     this.hud.setLevelName(this.level.name);
     this.hud.show(true);
-    for (const id of ['menu', 'results', 'options', 'choose', 'safehouse', 'night']) $(id).hidden = true;
+    for (const id of ['menu', 'results', 'options', 'choose', 'safehouse', 'night', 'quick']) $(id).hidden = true;
     if (localStorage.getItem(TIPS_KEY) !== '0') {
       this.hud.toast('Tap to move · hold a square, then slide up to reveal or down to flag (right-click also flags) · find the open manhole', 5000);
     }
@@ -115,7 +172,8 @@ class Game {
   showMenu(): void {
     this.hud.show(false);
     this.level = null;
-    for (const id of ['results', 'options', 'choose', 'safehouse', 'night']) $(id).hidden = true;
+    for (const id of ['results', 'options', 'choose', 'safehouse', 'night', 'quick', 'load', 'how']) $(id).hidden = true;
+    ($('m-load') as HTMLButtonElement).disabled = false;
     ($('m-continue') as HTMLButtonElement).disabled = !this.base;
     $('menu').hidden = false;
   }
@@ -156,6 +214,7 @@ class Game {
         this.showSafehouse();
       },
     });
+    if (b.expedition && !this.level) return this.resumeExpedition(); // a reload mid-expedition resumes it
     if (b.pendingNight && !this.night) return this.sleep(b.pendingNight.seed); // a reload mid-night resumes it
     $('safehouse').hidden = false;
   }
@@ -286,8 +345,10 @@ class Game {
   /** Leave an expedition for the safehouse; if it is not over, this counts as a failed run. */
   private abandon(): void {
     const l = this.level;
-    if (l && this.base && this.run.kind === 'gen' && l.status === 'playing') {
+    if (this.run.kind !== 'gen') return this.showMenu(); // practice runs cost nothing to leave
+    if (l && this.base && l.status === 'playing') {
       if (!window.confirm('Abandon this expedition? Everything you found is lost.')) return;
+      this.base.expedition = null;
       returnHome(this.base, { ...l.results(), status: 'failed' });
       this.persist();
       this.resultsShown = true;
@@ -322,6 +383,7 @@ class Game {
     const level = this.level;
     if (level) {
       this.measureHud();
+      this.autosaveExpedition(dt);
       level.update(dt);
       const events = level.drainEvents();
       this.renderer.handleEvents(level, events);
@@ -360,6 +422,7 @@ class Game {
     const gen = this.base && this.run.kind === 'gen';
     let extra = '';
     if (gen && this.base) {
+      this.base.expedition = null;
       const rep = returnHome(this.base, r);
       this.persist();
       if (won) {
@@ -377,7 +440,9 @@ class Game {
     $('r-scrap').textContent = won ? String(r.loot.scrap) : '—';
     $('r-food').textContent = won ? String(r.loot.food) : '—';
     $('r-materials').textContent = won ? String(r.loot.materials) : '—';
-    $('r-again').textContent = gen ? 'Return to the safehouse' : won ? 'Play again' : 'Retry this map';
+    const quick = this.run.kind === 'quick';
+    if (quick) $('r-sub').textContent = `${level.name} · Quick Play: nothing was saved`;
+    $('r-again').textContent = gen ? 'Return to the safehouse' : quick ? (won ? 'Another quick game' : 'Retry this map') : won ? 'Play again' : 'Retry this map';
     $('r-menu').hidden = !!gen;
     $('results').hidden = false;
   }
@@ -525,6 +590,61 @@ class Game {
       this.persist();
       this.showSafehouse();
     });
+    const flush = (): void => this.autosaveExpedition(0, true);
+    document.addEventListener('visibilitychange', () => document.hidden && flush());
+    window.addEventListener('pagehide', flush);
+    $('m-how').addEventListener('click', () => {
+      $('menu').hidden = true;
+      $('how').hidden = false;
+    });
+    $('how-back').addEventListener('click', () => this.showMenu());
+    $('m-load').addEventListener('click', () => {
+      const b = this.base;
+      $('l-summary').textContent = b
+        ? `Saved game: Day ${b.day}, ${b.survivors.length} survivor${b.survivors.length === 1 ? '' : 's'}, ${b.stock.scrap} scrap.`
+        : 'No saved game on this device yet. You can restore one from a save code below.';
+      ($('l-load') as HTMLButtonElement).disabled = !b;
+      ($('l-code') as HTMLTextAreaElement).value = '';
+      $('l-msg').textContent = '';
+      $('menu').hidden = true;
+      $('load').hidden = false;
+    });
+    $('l-back').addEventListener('click', () => this.showMenu());
+    $('l-load').addEventListener('click', () => this.showSafehouse());
+    $('l-export').addEventListener('click', () => {
+      const code = this.base ? btoa(serialize(this.base)) : '';
+      const box = $('l-code') as HTMLTextAreaElement;
+      box.value = code;
+      if (!code) return void ($('l-msg').textContent = 'Nothing to export yet.');
+      box.select();
+      void navigator.clipboard?.writeText(code).then(
+        () => ($('l-msg').textContent = 'Copied. Keep it somewhere safe.'),
+        () => ($('l-msg').textContent = 'Select the code above and copy it.'),
+      );
+    });
+    $('l-import').addEventListener('click', () => {
+      const text = ($('l-code') as HTMLTextAreaElement).value.trim();
+      let b: BaseState | null = null;
+      try {
+        b = deserialize(atob(text));
+      } catch {
+        b = null;
+      }
+      if (!b) return void ($('l-msg').textContent = 'That code is not a valid save.');
+      if (this.base && !window.confirm('Replace your current saved game with this one?')) return;
+      this.base = b;
+      this.persist();
+      this.showSafehouse();
+    });
+    $('m-quick').addEventListener('click', () => {
+      $('menu').hidden = true;
+      $('quick').hidden = false;
+    });
+    $('q-back').addEventListener('click', () => {
+      $('quick').hidden = true;
+      $('menu').hidden = false;
+    });
+    document.querySelectorAll<HTMLElement>('.qdiff').forEach((b) => b.addEventListener('click', () => this.startQuick(b.dataset.diff as Difficulty)));
     $('m-continue').addEventListener('click', () => this.showSafehouse());
     $('n-ok').addEventListener('click', () => this.showSafehouse());
     $('n-start').addEventListener('click', () => {
@@ -570,6 +690,7 @@ class Game {
     $('r-again').addEventListener('click', () => {
       // After a win, roll a new map of the same difficulty; after a loss, retry the same one.
       if (this.run.kind === 'gen' && this.base) this.showSafehouse();
+      else if (this.run.kind === 'quick' && this.level?.status === 'won') this.startQuick(this.run.difficulty);
       else this.start();
     });
     $('r-menu').addEventListener('click', () => this.showMenu());

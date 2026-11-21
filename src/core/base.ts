@@ -7,7 +7,7 @@ import type { Kit, Results } from './types.js';
  */
 
 export type Role = 'engineer' | 'medic' | 'farmer' | 'soldier' | 'scavenger';
-export type Facility = 'storage' | 'garden' | 'workshop' | 'armoury' | 'barricades' | 'watchtower';
+export type Facility = 'storage' | 'garden' | 'workshop' | 'radio' | 'armoury' | 'barricades' | 'watchtower';
 export type Stock = { scrap: number; food: number; materials: number };
 
 export interface Survivor {
@@ -27,6 +27,8 @@ export interface BaseState {
   nextSurvivorId: number;
   /** A night attack that has started but not finished (so a reload resumes the same night). */
   pendingNight?: { seed: number } | null;
+  /** An expedition in progress: the map is regenerated from its seed, then the snapshot is put back on it. */
+  expedition?: { difficulty: 'safe' | 'scouting' | 'risky'; seed: number; region: string; snap: unknown } | null;
 }
 
 export const ROLES: Record<Role, { label: string; perk: string }> = {
@@ -43,6 +45,7 @@ export const FACILITIES: Record<Facility, { label: string; blurb: string; max: n
   storage: { label: 'Storage', blurb: 'Raises how much of each resource you can keep.', max: 3, levelNote: (l) => `Cap ${storageCap(l)} each` },
   garden: { label: 'Garden', blurb: 'Grows food overnight.', max: 3, levelNote: (l) => `+${gardenYield(l)} food / night` },
   workshop: { label: 'Workshop', blurb: 'Craft supplies for expeditions. Upgrades make crafting cheaper.', max: 3, levelNote: (l) => (l === 0 ? 'Not built' : l === 1 ? 'Standard crafting prices' : `Crafting −${l - 1} scrap`) },
+  radio: { label: 'Radio', blurb: 'Scouts ahead: you set out with free map fragments.', max: 3, levelNote: (l) => (l === 0 ? 'Silent' : `${l} free map fragment${l === 1 ? '' : 's'} per expedition`) },
   armoury: { label: 'Armoury', blurb: 'Better bows: arrows fly faster and hit harder at night.', max: 3, levelNote: (l) => (l === 0 ? 'Plain bows' : `Fire rate +${l * 25}%, damage +${l}`) },
   barricades: { label: 'Barricades', blurb: 'Stronger walls for night attacks (used once night defence arrives).', max: 3, levelNote: (l) => `Level ${l}` },
   watchtower: { label: 'Watchtower', blurb: 'Early warning of night attacks (used once night defence arrives).', max: 3, levelNote: (l) => `Level ${l}` },
@@ -98,7 +101,7 @@ export function newBase(): BaseState {
     stock: { scrap: 8, food: 6, materials: 4 },
     kit: { ammo: 3, explosive: 0, map: 0, shield: 0 },
     survivors: [],
-    facilities: { storage: 0, garden: 0, workshop: 0, armoury: 0, barricades: 0, watchtower: 0 },
+    facilities: { storage: 0, garden: 0, workshop: 0, radio: 0, armoury: 0, barricades: 0, watchtower: 0 },
     nextSurvivorId: 1,
   };
 }
@@ -119,7 +122,7 @@ export function loadout(s: BaseState): Kit & { hearts: number } {
   return {
     ammo: s.kit.ammo + (hasRole(s, 'soldier') ? 2 : 0),
     explosive: s.kit.explosive,
-    map: s.kit.map,
+    map: s.kit.map + s.facilities.radio,
     shield: s.kit.shield,
     hearts: CONFIG.startHearts + (hasRole(s, 'medic') ? 1 : 0),
   };
@@ -159,7 +162,7 @@ export function returnHome(s: BaseState, r: Results, rng: () => number = Math.ra
   }
   // leftover supplies go back into the store room (soldier's extra ammo is not kept)
   for (const k of Object.keys(s.kit) as (keyof Kit)[]) {
-    const carried = r.kit[k] - (k === 'ammo' && hasRole(s, 'soldier') ? 2 : 0);
+    const carried = r.kit[k] - (k === 'ammo' && hasRole(s, 'soldier') ? 2 : 0) - (k === 'map' ? s.facilities.radio : 0);
     s.kit[k] = Math.min(KIT_CAP, s.kit[k] + Math.max(0, carried));
   }
   for (let i = 0; i < r.rescued; i++) rep.recruited.push(recruit(s, rng));

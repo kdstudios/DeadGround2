@@ -211,3 +211,16 @@ Only the two minigames (rules, physics and art) were taken from the other game; 
 - **Hold a hidden square** for a split second: **Reveal** appears above it and **Flag** (or **Unflag**) below it. Slide your finger up or down to choose, release to confirm, release in the middle to cancel. Dragging before the hold still pans the map. Right-click still flags on desktop.
 - **Rotating a phone** now re-fits the canvas on the next frame (and on orientationchange / visualViewport resize), so the picture no longer stretches and taps line up.
 - **Terminal minigame:** the whole guess history stays in a scrollable log (swipe or wheel), auto-scrolling to the newest line.
+
+## Phase 5 additions (v16)
+
+- **Load Game** screen: saved-game summary, plus Copy save code / Restore from code for backups and moving devices.
+- **How to play** screen reachable from the main menu.
+- **Quick Play** (easy/medium/hard, random region) never touches the main save.
+- **Mid-expedition resume**: expeditions autosave every 2 s and resume exactly where you left off.
+- **Radio** facility: free map fragments per expedition.
+- **Night zombie types**: runners (fast, weak) from day 4, brutes (slow, tough) from day 8.
+- Map generation runs in a Web Worker (with a synchronous fallback).
+- Building types (house, store, warehouse, clinic) weight the loot found inside; layouts unchanged so maps stay guess-free.
+- Jagged fence: fence cells crumble to varying heights.
+- Ground outside the map boundary is edge-blended like the playable floor.

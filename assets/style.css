@@ -155,3 +155,7 @@ button.act:disabled { color: #6c746a; background: #2b352e; border-color: #3a463d
 #radial .dn { top: calc(var(--gap-dn, 60px) - 18px); }
 #radial .up.pick { background: #3fa14a; border-color: #9de66a; color: #fff; transform: translateX(-50%) scale(1.15); }
 #radial .dn.pick { background: #c93b30; border-color: #ff9a8a; color: #fff; transform: translateX(-50%) scale(1.15); }
+
+#l-code { width: 100%; box-sizing: border-box; font: 12px monospace; color: #cdd8c8; background: #0f1611; border: 2px solid var(--panel-edge); border-radius: 8px; padding: 6px; margin: 6px 0; }
+.how ul { padding-left: 18px; color: #cdd8c8; font-size: 14px; line-height: 1.45; }
+.how h2 { margin: 0 0 4px; }

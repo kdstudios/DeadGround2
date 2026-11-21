@@ -411,6 +411,13 @@ export class Renderer {
     return c.object !== null && OBJECTS[c.object].solid === true;
   }
 
+  /** Deterministic 0..0.55: how much of a fence cell's top has crumbled away (0 = intact). */
+  private fenceBreak(x: number, y: number): number {
+    const h = Math.sin(x * 127.1 + y * 311.7) * 43758.5453;
+    const f = h - Math.floor(h);
+    return f < 0.4 ? 0 : 0.15 + (f - 0.4) * 0.67;
+  }
+
   private wallName(level: Level, x: number, y: number): string {
     const m =
       (this.wallish(level, x, y - 1) ? 1 : 0) |
@@ -436,8 +443,7 @@ export class Renderer {
     for (let y = by0; y <= by1; y++) {
       for (let x = bx0; x <= bx1; x++) {
         if (level.inBounds(x, y)) continue;
-        const g = vis.groundFor(level, x, y);
-        if (!this.tileImg(g.name, g.rot, sx(x), sy(y))) {
+        if (!this.groundCell(level, x, y, sx(x), sy(y))) {
           ctx.fillStyle = '#4a3b28';
           ctx.fillRect(sx(x), sy(y), T, T);
         }
@@ -476,7 +482,7 @@ export class Renderer {
     if (!open.has(g.name)) return this.tileImg(g.name, g.rot, px, py);
     let cache = this.blendCache.get(level);
     if (!cache) this.blendCache.set(level, (cache = new Map()));
-    const key = y * 4096 + x;
+    const key = (y + 1000) * 4096 + x + 1000;
     let cv = cache.get(key);
     if (cv === undefined) {
       const nb: { dx: number; dy: number; name: string; rot: number }[] = [];
@@ -540,6 +546,17 @@ export class Renderer {
     }
     if (c.terrain === 'wall' || solidObject) {
       // walls and sealed doorways (door / planks / cracked wall) stand on a wall tile
+      const broken = zone === 'fence' && c.terrain === 'wall' ? this.fenceBreak(x, y) : 0;
+      if (broken > 0) {
+        // jagged fence: a broken stump, only the lower part of the tile still stands
+        this.groundCell(level, x, y, px, py);
+        const im = this.sprites.get(this.wallName(level, x, y));
+        if (im) {
+          const keep = 1 - broken;
+          ctx.drawImage(im, 0, im.height * broken, im.width, im.height * keep, px, py + T * broken, T + 0.75, T * keep + 0.75);
+          return;
+        }
+      }
       if (!this.img(ctx, this.wallName(level, x, y), px, py, T + 0.75, T + 0.75)) {
         ctx.fillStyle = '#667';
         ctx.fillRect(px, py, T, T);

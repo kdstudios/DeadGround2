@@ -75,6 +75,20 @@ export function computeClues(width: number, height: number, cells: Cell[]): void
   }
 }
 
+export interface LevelSnapshot {
+  cells: (string | number | null)[][];
+  player: Pos;
+  facing: Facing;
+  hearts: number;
+  shield: number;
+  inventory: Record<InventoryKey, number>;
+  loot: Record<LootKey, number>;
+  rescued: number;
+  time: number;
+  patrols: Patrol[];
+  vaults: Vault['status'][];
+}
+
 export class Level {
   readonly name: string;
   readonly width: number;
@@ -139,6 +153,58 @@ export class Level {
     });
     this.reveal(this.player.x, this.player.y);
     this.collectPickup(this.player.x, this.player.y);
+  }
+
+  // ───────────────────────── save / resume ─────────────────────────
+
+  /** Everything that changes during play, as plain JSON (the map itself is regenerated from its seed). */
+  snapshot(): LevelSnapshot {
+    return {
+      cells: this.cells.map((c) => [c.terrain, c.object, c.pickup, c.pickupAmount, c.revealed ? 1 : 0, c.flagged ? 1 : 0, c.triggered ? 1 : 0]),
+      player: { ...this.player },
+      facing: this.facing,
+      hearts: this.hearts,
+      shield: this.shield,
+      inventory: { ...this.inventory },
+      loot: { ...this.loot },
+      rescued: this.rescued,
+      time: this.time,
+      patrols: this.patrols.map((p) => ({ ...p, route: p.route.map((r) => ({ ...r })) })),
+      vaults: this.vaults.map((v) => v.status),
+    };
+  }
+
+  /** Put a snapshot back onto a freshly generated copy of the same map. Returns false if it does not fit. */
+  restore(s: LevelSnapshot): boolean {
+    if (s.cells.length !== this.cells.length || s.patrols.length !== this.patrols.length || s.vaults.length !== this.vaults.length) return false;
+    s.cells.forEach((a, i) => {
+      const c = this.cells[i]!;
+      c.terrain = a[0] as Cell['terrain'];
+      c.object = a[1] as Cell['object'];
+      c.pickup = a[2] as Cell['pickup'];
+      c.pickupAmount = a[3] as number;
+      c.revealed = a[4] === 1;
+      c.flagged = a[5] === 1;
+      c.triggered = a[6] === 1;
+    });
+    this.player = { ...s.player };
+    this.facing = s.facing;
+    this.hearts = s.hearts;
+    this.shield = s.shield;
+    this.inventory = { ...s.inventory };
+    this.loot = { ...s.loot };
+    this.rescued = s.rescued;
+    this.time = s.time;
+    this.patrols = s.patrols.map((p) => ({ ...p, route: p.route.map((r) => ({ ...r })) }));
+    s.vaults.forEach((st, i) => (this.vaults[i]!.status = st));
+    this.path = [];
+    this.intent = null;
+    this.goal = null;
+    this.pending = null;
+    this.minigame = null;
+    this.stepProgress = 0;
+    this.events = [];
+    return true;
   }
 
   // ───────────────────────── queries ─────────────────────────

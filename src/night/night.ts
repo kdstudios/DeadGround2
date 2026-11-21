@@ -74,7 +74,22 @@ export type NightEvent =
 
 export type Phase = 'prep' | 'wave' | 'won' | 'lost';
 
-export interface Zombie { id: number; x: number; y: number; hp: number; bite: number; dir: 'up' | 'down' | 'left' | 'right'; hit: number }
+export type ZombieKind = 'walker' | 'runner' | 'brute';
+
+/** Night zombie types: runners are quick and brittle, brutes are slow, tough and hit gates and the core harder. */
+export const ZOMBIE_KINDS: Record<ZombieKind, { hp: number; speed: number; bite: number }> = {
+  walker: { hp: 3, speed: 1, bite: 1 },
+  runner: { hp: 2, speed: 1.8, bite: 1 },
+  brute: { hp: 9, speed: 0.55, bite: 2 },
+};
+
+/** Chance that a spawn is a runner / brute on a given day (none early, a gentle mix later). */
+export const kindChances = (day: number): { runner: number; brute: number } => ({
+  runner: day >= 4 ? Math.min(0.25, 0.04 + 0.02 * day) : 0,
+  brute: day >= 8 ? Math.min(0.12, 0.02 * (day - 6)) : 0,
+});
+
+export interface Zombie { kind: ZombieKind; maxHp: number; id: number; x: number; y: number; hp: number; bite: number; dir: 'up' | 'down' | 'left' | 'right'; hit: number }
 export interface Arrow { x: number; y: number; target: number; dmg: number }
 export interface Barricade { x: number; y: number; hp: number; max: number }
 export interface Tower { x: number; y: number; unlocked: boolean; survivorId: number | null; cd: number }
@@ -317,7 +332,11 @@ export class Night {
     if (this.spawnTimer > 0) return;
     this.spawnTimer = this.spawnEvery * (0.7 + this.rng.next() * 0.6);
     const p = this.rng.pick(SPAWNS);
-    this.zombies.push({ id: this.nextId++, x: p.x, y: p.y, hp: TUNING.zombieHp, bite: 0, dir: 'right', hit: 0 });
+    const ch = kindChances(this.setup.day);
+    const roll = this.rng.next();
+    const kind: ZombieKind = roll < ch.brute ? 'brute' : roll < ch.brute + ch.runner ? 'runner' : 'walker';
+    const hp = ZOMBIE_KINDS[kind].hp;
+    this.zombies.push({ kind, maxHp: hp, id: this.nextId++, x: p.x, y: p.y, hp, bite: 0, dir: 'right', hit: 0 });
     this.events.push({ type: 'spawn', at: { x: p.x, y: p.y } });
     this.spawned++;
   }
@@ -344,7 +363,7 @@ export class Night {
         z.bite -= dt;
         if (z.bite <= 0) {
           z.bite = TUNING.biteEvery;
-          this.coreHp = Math.max(0, this.coreHp - TUNING.zombieBite);
+          this.coreHp = Math.max(0, this.coreHp - ZOMBIE_KINDS[z.kind].bite);
           this.events.push({ type: 'coreHit', at: { ...this.core } });
         }
         continue;
@@ -357,7 +376,7 @@ export class Night {
         z.bite -= dt;
         if (z.bite <= 0) {
           z.bite = TUNING.biteEvery;
-          bar.hp = Math.max(0, bar.hp - TUNING.zombieBite);
+          bar.hp = Math.max(0, bar.hp - ZOMBIE_KINDS[z.kind].bite);
           this.events.push({ type: bar.hp <= 0 ? 'gateBreak' : 'gateHit', at: { x: bar.x, y: bar.y } });
         }
         continue;
@@ -365,7 +384,7 @@ export class Night {
       // glide towards the centre of the next cell
       const vx = best.x - z.x, vy = best.y - z.y;
       const len = Math.hypot(vx, vy) || 1;
-      const step = Math.min(len, TUNING.zombieSpeed * dt);
+      const step = Math.min(len, TUNING.zombieSpeed * ZOMBIE_KINDS[z.kind].speed * dt);
       z.x += (vx / len) * step;
       z.y += (vy / len) * step;
       z.dir = Math.abs(vx) > Math.abs(vy) ? (vx > 0 ? 'right' : 'left') : vy > 0 ? 'down' : 'up';

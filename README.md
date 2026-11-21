@@ -204,3 +204,10 @@ Only the two minigames (rules, physics and art) were taken from the other game; 
 - **Lock rules:** drag the lock to aim the pick, pull the lever to turn; the cylinder only turns as far as the angle allows, and over-pulling strains the pick. **Terminal rules:** tap a word to highlight and again to enter it; the clue is how many letters match in place; bracket pairs are exploits (remove a decoy or restore attempts).
 - **Guess-free maps still hold:** the vault is walled in before the solver validates the map (door counted as wall), nothing inside is required, and any candidate spot that changes solvability is discarded. Interiors contain no mines and read as clue 0.
 - Code: `src/minigames/` (pure rules, tested in `tests/minigames.test.mjs`), `src/ui/minigames.ts` (screens), vault generation in `src/gen/generate.ts`, vault engine rules in `src/core/level.ts`. Art: `art/atlas2/minigame.*` cut by `tools/build_sprites.py`.
+
+
+## Touch controls and fixes (v14)
+
+- **Hold a hidden square** for a split second: **Reveal** appears above it and **Flag** (or **Unflag**) below it. Slide your finger up or down to choose, release to confirm, release in the middle to cancel. Dragging before the hold still pans the map. Right-click still flags on desktop.
+- **Rotating a phone** now re-fits the canvas on the next frame (and on orientationchange / visualViewport resize), so the picture no longer stretches and taps line up.
+- **Terminal minigame:** the whole guess history stays in a scrollable log (swipe or wheel), auto-scrolling to the newest line.

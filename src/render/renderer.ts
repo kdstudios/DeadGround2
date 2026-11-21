@@ -80,6 +80,8 @@ export class Renderer {
     this.ctx = canvas.getContext('2d')!;
     this.resize();
     window.addEventListener('resize', () => this.resize());
+    window.addEventListener('orientationchange', () => this.resize());
+    window.visualViewport?.addEventListener('resize', () => this.resize());
   }
 
   resize(): void {
@@ -90,6 +92,10 @@ export class Renderer {
     this.canvas.height = Math.max(1, Math.floor(this.cssH * dpr));
     this.ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     this.tile = Math.max(44, Math.min(84, Math.min(this.cssW, this.cssH) / 8));
+  }
+
+  get tileSize(): number {
+    return this.tile;
   }
 
   setInsets(top: number, bottom: number): void {
@@ -199,7 +205,17 @@ export class Renderer {
 
   // ───────────────────────── frame ─────────────────────────
 
+  /** True if the canvas box or pixel ratio changed since the last resize (rotation events can fire before layout settles). */
+  private sizeStale(): boolean {
+    return (
+      this.canvas.clientWidth !== this.cssW ||
+      this.canvas.clientHeight !== this.cssH ||
+      this.canvas.width !== Math.max(1, Math.floor(this.cssW * (window.devicePixelRatio || 1)))
+    );
+  }
+
   render(level: Level, dt: number, flagMode: boolean): void {
+    if (this.sizeStale()) this.resize();
     this.clock += dt;
     const ctx = this.ctx;
     const T = this.tile;

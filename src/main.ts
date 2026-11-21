@@ -33,7 +33,9 @@ import { towerSlotsUnlocked } from './night/night.js';
 const $ = <T extends HTMLElement>(id: string): T => document.getElementById(id) as T;
 
 const TIPS_KEY = 'deadground.tips';
-const LONG_PRESS_MS = 420;
+const LONG_PRESS_MS = 260;
+/** How far (px) a held finger must slide up or down to choose Reveal or Flag. */
+const RADIAL_PICK_PX = 34;
 
 class Game {
   level: Level | null = null;
@@ -106,7 +108,7 @@ class Game {
     this.hud.show(true);
     for (const id of ['menu', 'results', 'options', 'choose', 'safehouse', 'night']) $(id).hidden = true;
     if (localStorage.getItem(TIPS_KEY) !== '0') {
-      this.hud.toast('Tap to move · hold (or right-click) to flag a suspected mine · find the open manhole', 5000);
+      this.hud.toast('Tap to move · hold a square, then slide up to reveal or down to flag (right-click also flags) · find the open manhole', 5000);
     }
   }
 
@@ -390,6 +392,15 @@ class Game {
     let longFired = false;
     let dragging = false;
     let lastPos = { x: 0, y: 0 };
+    // Hold on a hidden square: Reveal appears above it (slide up) and Flag/Unflag below it (slide down).
+    let radial: { x: number; y: number; choice: 'up' | 'down' | null } | null = null;
+    const radialEl = $('radial');
+    const upEl = radialEl.querySelector<HTMLElement>('.up')!;
+    const downEl = radialEl.querySelector<HTMLElement>('.dn')!;
+    const hideRadial = (): void => {
+      radial = null;
+      radialEl.hidden = true;
+    };
 
     const nightTap = (e: PointerEvent): void => {
       const rect = c.getBoundingClientRect();
@@ -422,16 +433,38 @@ class Game {
       window.clearTimeout(longTimer);
       longTimer = window.setTimeout(() => {
         const cell = cellAt(e);
-        if (cell && this.level) {
-          this.level.toggleFlag(cell.x, cell.y);
-          longFired = true;
-          navigator.vibrate?.(20);
-        }
+        const l = this.level;
+        if (!cell || !l || dragging) return;
+        const cc = l.cell(cell.x, cell.y);
+        if (cc.revealed) return; // nothing to choose on a square you can already see
+        longFired = true;
+        navigator.vibrate?.(20);
+        const rect = c.getBoundingClientRect();
+        const tl = this.renderer.cellToScreen(cell.x, cell.y);
+        radial = { x: cell.x, y: cell.y, choice: null };
+        radialEl.style.left = `${rect.left + tl.x + this.renderer.tileSize / 2}px`;
+        radialEl.style.top = `${rect.top + tl.y + this.renderer.tileSize / 2}px`;
+        const cy = rect.top + tl.y + this.renderer.tileSize / 2;
+        const gap = Math.round(this.renderer.tileSize * 0.5 + 34);
+        // keep both choices on screen even for squares at the edge
+        radialEl.style.setProperty('--gap-up', `${Math.max(34, Math.min(gap, cy - 34))}px`);
+        radialEl.style.setProperty('--gap-dn', `${Math.max(34, Math.min(gap, window.innerHeight - cy - 34))}px`);
+        downEl.textContent = cc.flagged ? 'Unflag ▼' : 'Flag ▼';
+        upEl.classList.remove('pick');
+        downEl.classList.remove('pick');
+        radialEl.hidden = false;
       }, LONG_PRESS_MS);
     });
 
     c.addEventListener('pointermove', (e) => {
       if (!downAt) return;
+      if (radial) {
+        const dy = e.clientY - downPos.y;
+        radial.choice = dy < -RADIAL_PICK_PX ? 'up' : dy > RADIAL_PICK_PX ? 'down' : null;
+        upEl.classList.toggle('pick', radial.choice === 'up');
+        downEl.classList.toggle('pick', radial.choice === 'down');
+        return;
+      }
       if (!dragging && Math.hypot(e.clientX - downPos.x, e.clientY - downPos.y) > 12) {
         dragging = true; // it is a camera drag, not a tap
         window.clearTimeout(longTimer);
@@ -444,6 +477,16 @@ class Game {
 
     c.addEventListener('pointerup', (e) => {
       window.clearTimeout(longTimer);
+      if (radial) {
+        const r = radial;
+        hideRadial();
+        downAt = 0;
+        if (this.level && e.button !== 2) {
+          if (r.choice === 'up') this.level.tap(r.x, r.y);
+          else if (r.choice === 'down') this.level.toggleFlag(r.x, r.y);
+        }
+        return;
+      }
       if (!this.level || e.button === 2 || longFired || !downAt) return;
       downAt = 0;
       if (dragging) return;
@@ -454,6 +497,7 @@ class Game {
     });
     c.addEventListener('pointercancel', () => {
       window.clearTimeout(longTimer);
+      hideRadial();
       downAt = 0;
     });
 

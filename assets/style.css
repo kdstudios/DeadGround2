@@ -145,4 +145,13 @@ button.act:disabled { color: #6c746a; background: #2b352e; border-color: #3a463d
 #mg-fill { position: absolute; top: 0; bottom: 0; right: 0; left: 100%; }
 #mg-hint { position: absolute; inset: 0 56px 0 0; display: flex; align-items: center; justify-content: center; font-size: 12px; color: #4fd47a; pointer-events: none; }
 #mg-handle { position: absolute; top: 3px; bottom: 3px; width: 56px; border-radius: 6px; background: #2bb052; color: #030704; font-weight: 800; display: flex; align-items: center; justify-content: center; left: calc(100% - 56px); }
-.mg-log { margin: 0; min-height: 4.6em; font-size: 12px; color: #4fd47a; white-space: pre-wrap; }
+.mg-log { margin: 0; height: 6.4em; overflow-y: auto; overscroll-behavior: contain; touch-action: pan-y; -webkit-overflow-scrolling: touch; font-size: 12px; line-height: 1.35; color: #4fd47a; white-space: pre-wrap; padding: 4px 6px; border: 1px solid #14502a; border-radius: 6px; background: rgba(57,255,106,.03); }
+
+/* Hold-on-a-square menu: Reveal above, Flag below */
+#radial { position: fixed; z-index: 4; width: 0; height: 0; pointer-events: none; --gap: 60px; }
+#radial .ring { position: absolute; left: -26px; top: -26px; width: 52px; height: 52px; border: 3px solid #ffc548; border-radius: 12px; box-shadow: 0 0 12px rgba(255,197,72,.7); }
+#radial b { position: absolute; left: 0; transform: translateX(-50%); white-space: nowrap; font: 800 15px/1 system-ui, sans-serif; padding: 9px 14px; color: #f2e8c8; background: rgba(20,26,20,.92); border: 2px solid #3a463d; border-radius: 22px; transition: transform .08s, background .08s; }
+#radial .up { top: calc(var(--gap-up, 60px) * -1 - 18px); }
+#radial .dn { top: calc(var(--gap-dn, 60px) - 18px); }
+#radial .up.pick { background: #3fa14a; border-color: #9de66a; color: #fff; transform: translateX(-50%) scale(1.15); }
+#radial .dn.pick { background: #c93b30; border-color: #ff9a8a; color: #fff; transform: translateX(-50%) scale(1.15); }

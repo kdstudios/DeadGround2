@@ -402,7 +402,9 @@ export class MinigameOverlay {
       prompt.textContent = `> ${cur ? s.rows[cur.row]!.slice(cur.start, cur.end) : ''}▌`;
       if (s.log.length !== lastLog) {
         lastLog = s.log.length;
-        log.textContent = s.log.slice(-4).join('\n');
+        // the whole history stays available: scroll or swipe the box to read earlier guesses
+        log.textContent = s.log.join('\n');
+        log.scrollTop = log.scrollHeight;
       }
       if (s.finished && !over) {
         over = true;

@@ -1,0 +1,132 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
+  <meta name="theme-color" content="#0b0f0c" />
+  <title>DeadGround</title>
+  <link rel="icon" href="data:," />
+  <link rel="stylesheet" href="assets/style.css" />
+</head>
+<body>
+  <canvas id="game"></canvas>
+
+  <!-- In-expedition HUD -->
+  <div id="hud" hidden>
+    <div id="topbar">
+      <button id="btn-menu" class="chip" title="Menu (Esc)">&#9776; Menu</button>
+      <div id="level-name" class="chip"></div>
+      <button id="btn-restart" class="chip" title="Restart expedition">&#8635;</button>
+    </div>
+    <div id="toast"></div>
+    <div id="bottombar">
+      <div class="panel" id="p-health">
+        <div id="hearts"></div>
+        <div class="stat"><img src="assets/sprites/ui_shield.png" alt="shield" /><span id="shield">0</span></div>
+      </div>
+      <div class="panel" id="p-keys">
+        <div class="stat" title="Keys"><img src="assets/sprites/item_key.png" alt="keys" /><span id="keys">0</span></div>
+        <div class="stat" title="Ammunition"><img src="assets/sprites/item_ammo.png" alt="ammo" /><span id="ammo">0</span></div>
+      </div>
+      <div class="panel" id="p-tools">
+        <div class="slot" id="slot-crowbar" title="Crowbar (auto-used on planks)"><img src="assets/sprites/item_crowbar.png" alt="crowbar" /><span id="crowbar">0</span></div>
+        <button class="slot" id="slot-bomb" title="Explosive (B): tap, then tap again to detonate"><img src="assets/sprites/item_explosive.png" alt="explosive" /><span id="bomb">0</span></button>
+        <button class="slot" id="slot-map" title="Map fragment (M): tap, then tap again to reveal"><img src="assets/sprites/item_map.png" alt="map" /><span id="map">0</span></button>
+        <button class="slot" id="slot-flag" title="Flag mode (F) - or long-press / right-click a tile"><img src="assets/sprites/ui_flag.png" alt="flag" /><span>flag</span></button>
+      </div>
+      <div class="panel" id="p-loot">
+        <div class="stat" title="Scrap"><img src="assets/sprites/item_scrap.png" alt="scrap" /><span id="loot-scrap">0</span></div>
+        <div class="stat" title="Food"><img src="assets/sprites/item_food.png" alt="food" /><span id="loot-food">0</span></div>
+        <div class="stat" title="Materials"><img src="assets/sprites/item_materials.png" alt="materials" /><span id="loot-materials">0</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main menu -->
+  <div id="menu" class="screen">
+    <div class="card">
+      <h1>DEAD<span>GROUND</span></h1>
+      <p class="sub">Minesweeper Adventure meets the zombie apocalypse</p>
+      <button id="m-new" class="big">New Game</button>
+      <button id="m-continue" class="big" disabled>Continue</button>
+      <button id="m-options" class="big">Options</button>
+      <p class="small">Phase 3 &middot; safehouse &amp; survival</p>
+    </div>
+  </div>
+
+  <!-- Choose an expedition -->
+  <div id="choose" class="screen" hidden>
+    <div class="card">
+      <h2>Choose your run</h2>
+      <div id="c-regions" class="regs"></div>
+      <p id="c-region-note" class="small"></p>
+      <p id="c-stamina" class="sub">Every expedition is a freshly generated map. Harder runs pay more loot.</p>
+      <button class="big diff" data-diff="safe" data-cost="1">Safe<small>Easy &middot; a small yard and one house, no patrols</small></button>
+      <button class="big diff" data-diff="scouting" data-cost="2">Scouting<small>Normal &middot; bigger wasteland, a fence, two houses with rooms, a SWAT patrol</small></button>
+      <button class="big diff" data-diff="risky" data-cost="3">Risky<small>Hard &middot; sprawling wasteland, four buildings, 2 patrols, best reward</small></button>
+      <button id="c-test" class="big ghost">Hand-built test map (practice, free)</button>
+      <button id="c-back" class="big ghost">Back</button>
+    </div>
+  </div>
+
+  <!-- Options -->
+  <div id="options" class="screen" hidden>
+    <div class="card">
+      <h2>Options</h2>
+      <label class="opt"><input type="checkbox" id="opt-tips" checked /> Show control tips at the start of an expedition</label>
+      <label class="opt"><input type="checkbox" id="opt-sound" checked /> Sound effects</label>
+      <button id="o-reset-tips" class="big ghost">Show safehouse tips again</button>
+      <button id="o-back" class="big">Back</button>
+    </div>
+  </div>
+
+  <!-- Expedition results -->
+  <div id="results" class="screen" hidden>
+    <div class="card parchment">
+      <h2 id="r-title"></h2>
+      <p id="r-sub" class="sub"></p>
+      <table>
+        <tr><td>Time</td><td id="r-time"></td></tr>
+        <tr><td>Hearts left</td><td id="r-hearts"></td></tr>
+        <tr><td>Scrap</td><td id="r-scrap"></td></tr>
+        <tr><td>Food</td><td id="r-food"></td></tr>
+        <tr><td>Materials</td><td id="r-materials"></td></tr>
+      </table>
+      <p id="r-extra" class="sub"></p>
+      <button id="r-again" class="big"></button>
+      <button id="r-menu" class="big">Main menu</button>
+    </div>
+  </div>
+
+  <!-- Safehouse hub -->
+  <div id="safehouse" class="screen scroll" hidden></div>
+
+  <!-- Night defence HUD -->
+  <div id="nhud" hidden>
+    <div class="ntop">
+      <div id="n-info" class="chip"></div>
+      <button id="n-skip" class="chip">Skip night</button>
+    </div>
+    <div id="n-hint" class="nhint"></div>
+    <div class="nbottom">
+      <button id="n-auto" class="big ghost">Auto-assign archers</button>
+      <button id="n-start" class="big">Start night</button>
+    </div>
+  </div>
+
+  <!-- Night report -->
+  <div id="night" class="screen" hidden>
+    <div class="card night">
+      <h2 id="n-title"></h2>
+      <p id="n-body" class="sub"></p>
+      <button id="n-ok" class="big">Wake up</button>
+    </div>
+  </div>
+
+  <!-- Lock / terminal minigames -->
+  <div id="minigame" hidden></div>
+
+  <div id="loading">Loading&hellip;</div>
+  <script type="module" src="dist/main.js"></script>
+</body>
+</html>

@@ -1,0 +1,1404 @@
+{
+ "tile": 64,
+ "sprites": {
+  "g_dirt0": {
+   "src": "sprites/g_dirt0.png",
+   "w": 64,
+   "h": 64
+  },
+  "g_dirt1": {
+   "src": "sprites/g_dirt1.png",
+   "w": 64,
+   "h": 64
+  },
+  "g_dirt2": {
+   "src": "sprites/g_dirt2.png",
+   "w": 64,
+   "h": 64
+  },
+  "g_dirt3": {
+   "src": "sprites/g_dirt3.png",
+   "w": 64,
+   "h": 64
+  },
+  "g_dirt4": {
+   "src": "sprites/g_dirt4.png",
+   "w": 64,
+   "h": 64
+  },
+  "g_dirt5": {
+   "src": "sprites/g_dirt5.png",
+   "w": 64,
+   "h": 64
+  },
+  "g_dirt6": {
+   "src": "sprites/g_dirt6.png",
+   "w": 64,
+   "h": 64
+  },
+  "g_dirt7": {
+   "src": "sprites/g_dirt7.png",
+   "w": 64,
+   "h": 64
+  },
+  "g_dark0": {
+   "src": "sprites/g_dark0.png",
+   "w": 64,
+   "h": 64
+  },
+  "g_dark1": {
+   "src": "sprites/g_dark1.png",
+   "w": 64,
+   "h": 64
+  },
+  "g_grass0": {
+   "src": "sprites/g_grass0.png",
+   "w": 64,
+   "h": 64
+  },
+  "g_grass1": {
+   "src": "sprites/g_grass1.png",
+   "w": 64,
+   "h": 64
+  },
+  "g_grass2": {
+   "src": "sprites/g_grass2.png",
+   "w": 64,
+   "h": 64
+  },
+  "g_grass3": {
+   "src": "sprites/g_grass3.png",
+   "w": 64,
+   "h": 64
+  },
+  "g_grass4": {
+   "src": "sprites/g_grass4.png",
+   "w": 64,
+   "h": 64
+  },
+  "g_grass5": {
+   "src": "sprites/g_grass5.png",
+   "w": 64,
+   "h": 64
+  },
+  "g_grass6": {
+   "src": "sprites/g_grass6.png",
+   "w": 64,
+   "h": 64
+  },
+  "g_grass7": {
+   "src": "sprites/g_grass7.png",
+   "w": 64,
+   "h": 64
+  },
+  "g_misc0": {
+   "src": "sprites/g_misc0.png",
+   "w": 64,
+   "h": 64
+  },
+  "g_misc1": {
+   "src": "sprites/g_misc1.png",
+   "w": 64,
+   "h": 64
+  },
+  "g_misc2": {
+   "src": "sprites/g_misc2.png",
+   "w": 64,
+   "h": 64
+  },
+  "g_paved0": {
+   "src": "sprites/g_paved0.png",
+   "w": 64,
+   "h": 64
+  },
+  "g_paved1": {
+   "src": "sprites/g_paved1.png",
+   "w": 64,
+   "h": 64
+  },
+  "g_paved2": {
+   "src": "sprites/g_paved2.png",
+   "w": 64,
+   "h": 64
+  },
+  "fog0": {
+   "src": "sprites/fog0.png",
+   "w": 64,
+   "h": 64
+  },
+  "fog1": {
+   "src": "sprites/fog1.png",
+   "w": 64,
+   "h": 64
+  },
+  "fog2": {
+   "src": "sprites/fog2.png",
+   "w": 64,
+   "h": 64
+  },
+  "fog3": {
+   "src": "sprites/fog3.png",
+   "w": 64,
+   "h": 64
+  },
+  "floor0": {
+   "src": "sprites/floor0.png",
+   "w": 64,
+   "h": 64
+  },
+  "floor1": {
+   "src": "sprites/floor1.png",
+   "w": 64,
+   "h": 64
+  },
+  "floor2": {
+   "src": "sprites/floor2.png",
+   "w": 64,
+   "h": 64
+  },
+  "floor3": {
+   "src": "sprites/floor3.png",
+   "w": 64,
+   "h": 64
+  },
+  "floor4": {
+   "src": "sprites/floor4.png",
+   "w": 64,
+   "h": 64
+  },
+  "floor5": {
+   "src": "sprites/floor5.png",
+   "w": 64,
+   "h": 64
+  },
+  "floor6": {
+   "src": "sprites/floor6.png",
+   "w": 64,
+   "h": 64
+  },
+  "floor7": {
+   "src": "sprites/floor7.png",
+   "w": 64,
+   "h": 64
+  },
+  "wall0": {
+   "src": "sprites/wall0.png",
+   "w": 64,
+   "h": 64
+  },
+  "wall1": {
+   "src": "sprites/wall1.png",
+   "w": 64,
+   "h": 64
+  },
+  "wall2": {
+   "src": "sprites/wall2.png",
+   "w": 64,
+   "h": 64
+  },
+  "wall3": {
+   "src": "sprites/wall3.png",
+   "w": 64,
+   "h": 64
+  },
+  "wall4": {
+   "src": "sprites/wall4.png",
+   "w": 64,
+   "h": 64
+  },
+  "wall5": {
+   "src": "sprites/wall5.png",
+   "w": 64,
+   "h": 64
+  },
+  "wall6": {
+   "src": "sprites/wall6.png",
+   "w": 64,
+   "h": 64
+  },
+  "wall7": {
+   "src": "sprites/wall7.png",
+   "w": 64,
+   "h": 64
+  },
+  "wall8": {
+   "src": "sprites/wall8.png",
+   "w": 64,
+   "h": 64
+  },
+  "wall9": {
+   "src": "sprites/wall9.png",
+   "w": 64,
+   "h": 64
+  },
+  "wall10": {
+   "src": "sprites/wall10.png",
+   "w": 64,
+   "h": 64
+  },
+  "wall11": {
+   "src": "sprites/wall11.png",
+   "w": 64,
+   "h": 64
+  },
+  "wall12": {
+   "src": "sprites/wall12.png",
+   "w": 64,
+   "h": 64
+  },
+  "wall13": {
+   "src": "sprites/wall13.png",
+   "w": 64,
+   "h": 64
+  },
+  "wall14": {
+   "src": "sprites/wall14.png",
+   "w": 64,
+   "h": 64
+  },
+  "wall15": {
+   "src": "sprites/wall15.png",
+   "w": 64,
+   "h": 64
+  },
+  "bwall0": {
+   "src": "sprites/bwall0.png",
+   "w": 64,
+   "h": 64
+  },
+  "bwall1": {
+   "src": "sprites/bwall1.png",
+   "w": 64,
+   "h": 64
+  },
+  "bwall2": {
+   "src": "sprites/bwall2.png",
+   "w": 64,
+   "h": 64
+  },
+  "bwall3": {
+   "src": "sprites/bwall3.png",
+   "w": 64,
+   "h": 64
+  },
+  "bwall4": {
+   "src": "sprites/bwall4.png",
+   "w": 64,
+   "h": 64
+  },
+  "bwall5": {
+   "src": "sprites/bwall5.png",
+   "w": 64,
+   "h": 64
+  },
+  "bwall6": {
+   "src": "sprites/bwall6.png",
+   "w": 64,
+   "h": 64
+  },
+  "bwall7": {
+   "src": "sprites/bwall7.png",
+   "w": 64,
+   "h": 64
+  },
+  "bwall8": {
+   "src": "sprites/bwall8.png",
+   "w": 64,
+   "h": 64
+  },
+  "bwall9": {
+   "src": "sprites/bwall9.png",
+   "w": 64,
+   "h": 64
+  },
+  "bwall10": {
+   "src": "sprites/bwall10.png",
+   "w": 64,
+   "h": 64
+  },
+  "bwall11": {
+   "src": "sprites/bwall11.png",
+   "w": 64,
+   "h": 64
+  },
+  "bwall12": {
+   "src": "sprites/bwall12.png",
+   "w": 64,
+   "h": 64
+  },
+  "bwall13": {
+   "src": "sprites/bwall13.png",
+   "w": 64,
+   "h": 64
+  },
+  "bwall14": {
+   "src": "sprites/bwall14.png",
+   "w": 64,
+   "h": 64
+  },
+  "bwall15": {
+   "src": "sprites/bwall15.png",
+   "w": 64,
+   "h": 64
+  },
+  "ruinwall0": {
+   "src": "sprites/ruinwall0.png",
+   "w": 64,
+   "h": 64
+  },
+  "ruinwall1": {
+   "src": "sprites/ruinwall1.png",
+   "w": 64,
+   "h": 64
+  },
+  "ruinwall2": {
+   "src": "sprites/ruinwall2.png",
+   "w": 64,
+   "h": 64
+  },
+  "ruinwall3": {
+   "src": "sprites/ruinwall3.png",
+   "w": 64,
+   "h": 64
+  },
+  "ruinwall4": {
+   "src": "sprites/ruinwall4.png",
+   "w": 64,
+   "h": 64
+  },
+  "ruinwall5": {
+   "src": "sprites/ruinwall5.png",
+   "w": 64,
+   "h": 64
+  },
+  "ruinwall6": {
+   "src": "sprites/ruinwall6.png",
+   "w": 64,
+   "h": 64
+  },
+  "ruinwall7": {
+   "src": "sprites/ruinwall7.png",
+   "w": 64,
+   "h": 64
+  },
+  "ruinwall8": {
+   "src": "sprites/ruinwall8.png",
+   "w": 64,
+   "h": 64
+  },
+  "ruinwall9": {
+   "src": "sprites/ruinwall9.png",
+   "w": 64,
+   "h": 64
+  },
+  "ruinwall10": {
+   "src": "sprites/ruinwall10.png",
+   "w": 64,
+   "h": 64
+  },
+  "ruinwall11": {
+   "src": "sprites/ruinwall11.png",
+   "w": 64,
+   "h": 64
+  },
+  "ruinwall12": {
+   "src": "sprites/ruinwall12.png",
+   "w": 64,
+   "h": 64
+  },
+  "ruinwall13": {
+   "src": "sprites/ruinwall13.png",
+   "w": 64,
+   "h": 64
+  },
+  "ruinwall14": {
+   "src": "sprites/ruinwall14.png",
+   "w": 64,
+   "h": 64
+  },
+  "ruinwall15": {
+   "src": "sprites/ruinwall15.png",
+   "w": 64,
+   "h": 64
+  },
+  "ov_door": {
+   "src": "sprites/ov_door.png",
+   "w": 46,
+   "h": 62
+  },
+  "ov_barricade": {
+   "src": "sprites/ov_barricade.png",
+   "w": 50,
+   "h": 62
+  },
+  "ov_crack": {
+   "src": "sprites/ov_crack.png",
+   "w": 64,
+   "h": 64
+  },
+  "obj_mine": {
+   "src": "sprites/obj_mine.png",
+   "w": 64,
+   "h": 64
+  },
+  "obj_crater": {
+   "src": "sprites/obj_crater.png",
+   "w": 64,
+   "h": 64
+  },
+  "obj_exit": {
+   "src": "sprites/obj_exit.png",
+   "w": 64,
+   "h": 64
+  },
+  "prop_rubble0": {
+   "src": "sprites/prop_rubble0.png",
+   "w": 62,
+   "h": 58
+  },
+  "prop_rubble1": {
+   "src": "sprites/prop_rubble1.png",
+   "w": 62,
+   "h": 58
+  },
+  "prop_rubble2": {
+   "src": "sprites/prop_rubble2.png",
+   "w": 62,
+   "h": 58
+  },
+  "prop_rubble3": {
+   "src": "sprites/prop_rubble3.png",
+   "w": 62,
+   "h": 58
+  },
+  "prop_rubble4": {
+   "src": "sprites/prop_rubble4.png",
+   "w": 62,
+   "h": 58
+  },
+  "prop_rubble5": {
+   "src": "sprites/prop_rubble5.png",
+   "w": 62,
+   "h": 58
+  },
+  "prop_rubble6": {
+   "src": "sprites/prop_rubble6.png",
+   "w": 62,
+   "h": 58
+  },
+  "prop_sandbags": {
+   "src": "sprites/prop_sandbags.png",
+   "w": 62,
+   "h": 58
+  },
+  "prop_barrier0": {
+   "src": "sprites/prop_barrier0.png",
+   "w": 62,
+   "h": 58
+  },
+  "prop_barrier1": {
+   "src": "sprites/prop_barrier1.png",
+   "w": 62,
+   "h": 58
+  },
+  "prop_boulder": {
+   "src": "sprites/prop_boulder.png",
+   "w": 62,
+   "h": 58
+  },
+  "prop_rocks0": {
+   "src": "sprites/prop_rocks0.png",
+   "w": 62,
+   "h": 58
+  },
+  "prop_rocks1": {
+   "src": "sprites/prop_rocks1.png",
+   "w": 62,
+   "h": 58
+  },
+  "prop_debris0": {
+   "src": "sprites/prop_debris0.png",
+   "w": 62,
+   "h": 58
+  },
+  "prop_debris1": {
+   "src": "sprites/prop_debris1.png",
+   "w": 62,
+   "h": 58
+  },
+  "prop_crate": {
+   "src": "sprites/prop_crate.png",
+   "w": 62,
+   "h": 58
+  },
+  "prop_barrel0": {
+   "src": "sprites/prop_barrel0.png",
+   "w": 62,
+   "h": 58
+  },
+  "prop_barrel1": {
+   "src": "sprites/prop_barrel1.png",
+   "w": 62,
+   "h": 58
+  },
+  "prop_barrel2": {
+   "src": "sprites/prop_barrel2.png",
+   "w": 62,
+   "h": 58
+  },
+  "prop_tire": {
+   "src": "sprites/prop_tire.png",
+   "w": 62,
+   "h": 58
+  },
+  "prop_bin": {
+   "src": "sprites/prop_bin.png",
+   "w": 62,
+   "h": 58
+  },
+  "prop_planks": {
+   "src": "sprites/prop_planks.png",
+   "w": 62,
+   "h": 58
+  },
+  "prop_stump": {
+   "src": "sprites/prop_stump.png",
+   "w": 62,
+   "h": 58
+  },
+  "prop_bush0": {
+   "src": "sprites/prop_bush0.png",
+   "w": 62,
+   "h": 58
+  },
+  "prop_bush1": {
+   "src": "sprites/prop_bush1.png",
+   "w": 62,
+   "h": 58
+  },
+  "furn52": {
+   "src": "sprites/furn52.png",
+   "w": 58,
+   "h": 56
+  },
+  "furn53": {
+   "src": "sprites/furn53.png",
+   "w": 58,
+   "h": 56
+  },
+  "furn54": {
+   "src": "sprites/furn54.png",
+   "w": 58,
+   "h": 56
+  },
+  "furn55": {
+   "src": "sprites/furn55.png",
+   "w": 58,
+   "h": 56
+  },
+  "furn56": {
+   "src": "sprites/furn56.png",
+   "w": 58,
+   "h": 56
+  },
+  "furn57": {
+   "src": "sprites/furn57.png",
+   "w": 58,
+   "h": 56
+  },
+  "furn59": {
+   "src": "sprites/furn59.png",
+   "w": 58,
+   "h": 56
+  },
+  "furn60": {
+   "src": "sprites/furn60.png",
+   "w": 58,
+   "h": 56
+  },
+  "furn62": {
+   "src": "sprites/furn62.png",
+   "w": 58,
+   "h": 56
+  },
+  "furn63": {
+   "src": "sprites/furn63.png",
+   "w": 58,
+   "h": 56
+  },
+  "furn64": {
+   "src": "sprites/furn64.png",
+   "w": 58,
+   "h": 56
+  },
+  "furn65": {
+   "src": "sprites/furn65.png",
+   "w": 58,
+   "h": 56
+  },
+  "furn66": {
+   "src": "sprites/furn66.png",
+   "w": 58,
+   "h": 56
+  },
+  "furn70": {
+   "src": "sprites/furn70.png",
+   "w": 58,
+   "h": 56
+  },
+  "furn73": {
+   "src": "sprites/furn73.png",
+   "w": 58,
+   "h": 56
+  },
+  "furn75": {
+   "src": "sprites/furn75.png",
+   "w": 58,
+   "h": 56
+  },
+  "furn76": {
+   "src": "sprites/furn76.png",
+   "w": 58,
+   "h": 56
+  },
+  "furn77": {
+   "src": "sprites/furn77.png",
+   "w": 58,
+   "h": 56
+  },
+  "furn78": {
+   "src": "sprites/furn78.png",
+   "w": 58,
+   "h": 56
+  },
+  "furn79": {
+   "src": "sprites/furn79.png",
+   "w": 58,
+   "h": 56
+  },
+  "furn80": {
+   "src": "sprites/furn80.png",
+   "w": 58,
+   "h": 56
+  },
+  "furn82": {
+   "src": "sprites/furn82.png",
+   "w": 58,
+   "h": 56
+  },
+  "furn86": {
+   "src": "sprites/furn86.png",
+   "w": 58,
+   "h": 56
+  },
+  "furn87": {
+   "src": "sprites/furn87.png",
+   "w": 58,
+   "h": 56
+  },
+  "furn89": {
+   "src": "sprites/furn89.png",
+   "w": 58,
+   "h": 56
+  },
+  "furn90": {
+   "src": "sprites/furn90.png",
+   "w": 58,
+   "h": 56
+  },
+  "furn91": {
+   "src": "sprites/furn91.png",
+   "w": 58,
+   "h": 56
+  },
+  "furn92": {
+   "src": "sprites/furn92.png",
+   "w": 58,
+   "h": 56
+  },
+  "furn93": {
+   "src": "sprites/furn93.png",
+   "w": 58,
+   "h": 56
+  },
+  "furn95": {
+   "src": "sprites/furn95.png",
+   "w": 58,
+   "h": 56
+  },
+  "furn97": {
+   "src": "sprites/furn97.png",
+   "w": 58,
+   "h": 56
+  },
+  "furn99": {
+   "src": "sprites/furn99.png",
+   "w": 58,
+   "h": 56
+  },
+  "decor_tree_dead": {
+   "src": "sprites/decor_tree_dead.png",
+   "w": 58,
+   "h": 63
+  },
+  "decor_bush": {
+   "src": "sprites/decor_bush.png",
+   "w": 56,
+   "h": 56
+  },
+  "decor_tent": {
+   "src": "sprites/decor_tent.png",
+   "w": 73,
+   "h": 63
+  },
+  "decor_crates": {
+   "src": "sprites/decor_crates.png",
+   "w": 105,
+   "h": 59
+  },
+  "decor_barrel": {
+   "src": "sprites/decor_barrel.png",
+   "w": 38,
+   "h": 57
+  },
+  "decor_rubble_big": {
+   "src": "sprites/decor_rubble_big.png",
+   "w": 90,
+   "h": 61
+  },
+  "decor_rubble_big2": {
+   "src": "sprites/decor_rubble_big2.png",
+   "w": 75,
+   "h": 53
+  },
+  "decor_flag": {
+   "src": "sprites/decor_flag.png",
+   "w": 43,
+   "h": 62
+  },
+  "decor_tree": {
+   "src": "sprites/decor_tree.png",
+   "w": 110,
+   "h": 110
+  },
+  "bld0": {
+   "src": "sprites/bld0.png",
+   "w": 149,
+   "h": 161
+  },
+  "bld1": {
+   "src": "sprites/bld1.png",
+   "w": 169,
+   "h": 163
+  },
+  "bld2": {
+   "src": "sprites/bld2.png",
+   "w": 154,
+   "h": 160
+  },
+  "bld3": {
+   "src": "sprites/bld3.png",
+   "w": 165,
+   "h": 170
+  },
+  "bld4": {
+   "src": "sprites/bld4.png",
+   "w": 156,
+   "h": 138
+  },
+  "bld5": {
+   "src": "sprites/bld5.png",
+   "w": 192,
+   "h": 167
+  },
+  "bld6": {
+   "src": "sprites/bld6.png",
+   "w": 139,
+   "h": 141
+  },
+  "bld7": {
+   "src": "sprites/bld7.png",
+   "w": 84,
+   "h": 173
+  },
+  "item_ammo": {
+   "src": "sprites/item_ammo.png",
+   "w": 64,
+   "h": 64
+  },
+  "item_crowbar": {
+   "src": "sprites/item_crowbar.png",
+   "w": 64,
+   "h": 64
+  },
+  "item_explosive": {
+   "src": "sprites/item_explosive.png",
+   "w": 64,
+   "h": 64
+  },
+  "item_food": {
+   "src": "sprites/item_food.png",
+   "w": 64,
+   "h": 64
+  },
+  "item_key": {
+   "src": "sprites/item_key.png",
+   "w": 64,
+   "h": 64
+  },
+  "item_map": {
+   "src": "sprites/item_map.png",
+   "w": 64,
+   "h": 64
+  },
+  "item_materials": {
+   "src": "sprites/item_materials.png",
+   "w": 64,
+   "h": 64
+  },
+  "item_medkit": {
+   "src": "sprites/item_medkit.png",
+   "w": 64,
+   "h": 64
+  },
+  "item_scrap": {
+   "src": "sprites/item_scrap.png",
+   "w": 64,
+   "h": 64
+  },
+  "item_shield": {
+   "src": "sprites/item_shield.png",
+   "w": 64,
+   "h": 64
+  },
+  "ui_shield": {
+   "src": "sprites/ui_shield.png",
+   "w": 64,
+   "h": 64
+  },
+  "ui_heart": {
+   "src": "sprites/ui_heart.png",
+   "w": 64,
+   "h": 64
+  },
+  "ui_flag": {
+   "src": "sprites/ui_flag.png",
+   "w": 64,
+   "h": 64
+  },
+  "player_down_0": {
+   "src": "sprites/player_down_0.png",
+   "w": 64,
+   "h": 64
+  },
+  "player_down_1": {
+   "src": "sprites/player_down_1.png",
+   "w": 64,
+   "h": 64
+  },
+  "player_down_2": {
+   "src": "sprites/player_down_2.png",
+   "w": 64,
+   "h": 64
+  },
+  "player_down_3": {
+   "src": "sprites/player_down_3.png",
+   "w": 64,
+   "h": 64
+  },
+  "player_up_0": {
+   "src": "sprites/player_up_0.png",
+   "w": 64,
+   "h": 64
+  },
+  "player_up_1": {
+   "src": "sprites/player_up_1.png",
+   "w": 64,
+   "h": 64
+  },
+  "player_up_2": {
+   "src": "sprites/player_up_2.png",
+   "w": 64,
+   "h": 64
+  },
+  "player_up_3": {
+   "src": "sprites/player_up_3.png",
+   "w": 64,
+   "h": 64
+  },
+  "player_left_0": {
+   "src": "sprites/player_left_0.png",
+   "w": 64,
+   "h": 64
+  },
+  "player_left_1": {
+   "src": "sprites/player_left_1.png",
+   "w": 64,
+   "h": 64
+  },
+  "player_left_2": {
+   "src": "sprites/player_left_2.png",
+   "w": 64,
+   "h": 64
+  },
+  "player_left_3": {
+   "src": "sprites/player_left_3.png",
+   "w": 64,
+   "h": 64
+  },
+  "player_right_0": {
+   "src": "sprites/player_right_0.png",
+   "w": 64,
+   "h": 64
+  },
+  "player_right_1": {
+   "src": "sprites/player_right_1.png",
+   "w": 64,
+   "h": 64
+  },
+  "player_right_2": {
+   "src": "sprites/player_right_2.png",
+   "w": 64,
+   "h": 64
+  },
+  "player_right_3": {
+   "src": "sprites/player_right_3.png",
+   "w": 64,
+   "h": 64
+  },
+  "zombie_down_0": {
+   "src": "sprites/zombie_down_0.png",
+   "w": 64,
+   "h": 64
+  },
+  "zombie_down_1": {
+   "src": "sprites/zombie_down_1.png",
+   "w": 64,
+   "h": 64
+  },
+  "zombie_down_2": {
+   "src": "sprites/zombie_down_2.png",
+   "w": 64,
+   "h": 64
+  },
+  "zombie_down_3": {
+   "src": "sprites/zombie_down_3.png",
+   "w": 64,
+   "h": 64
+  },
+  "zombie_up_0": {
+   "src": "sprites/zombie_up_0.png",
+   "w": 64,
+   "h": 64
+  },
+  "zombie_up_1": {
+   "src": "sprites/zombie_up_1.png",
+   "w": 64,
+   "h": 64
+  },
+  "zombie_up_2": {
+   "src": "sprites/zombie_up_2.png",
+   "w": 64,
+   "h": 64
+  },
+  "zombie_up_3": {
+   "src": "sprites/zombie_up_3.png",
+   "w": 64,
+   "h": 64
+  },
+  "zombie_left_0": {
+   "src": "sprites/zombie_left_0.png",
+   "w": 64,
+   "h": 64
+  },
+  "zombie_left_1": {
+   "src": "sprites/zombie_left_1.png",
+   "w": 64,
+   "h": 64
+  },
+  "zombie_left_2": {
+   "src": "sprites/zombie_left_2.png",
+   "w": 64,
+   "h": 64
+  },
+  "zombie_left_3": {
+   "src": "sprites/zombie_left_3.png",
+   "w": 64,
+   "h": 64
+  },
+  "zombie_right_0": {
+   "src": "sprites/zombie_right_0.png",
+   "w": 64,
+   "h": 64
+  },
+  "zombie_right_1": {
+   "src": "sprites/zombie_right_1.png",
+   "w": 64,
+   "h": 64
+  },
+  "zombie_right_2": {
+   "src": "sprites/zombie_right_2.png",
+   "w": 64,
+   "h": 64
+  },
+  "zombie_right_3": {
+   "src": "sprites/zombie_right_3.png",
+   "w": 64,
+   "h": 64
+  },
+  "swat_down_0": {
+   "src": "sprites/swat_down_0.png",
+   "w": 64,
+   "h": 64
+  },
+  "swat_down_1": {
+   "src": "sprites/swat_down_1.png",
+   "w": 64,
+   "h": 64
+  },
+  "swat_down_2": {
+   "src": "sprites/swat_down_2.png",
+   "w": 64,
+   "h": 64
+  },
+  "swat_down_3": {
+   "src": "sprites/swat_down_3.png",
+   "w": 64,
+   "h": 64
+  },
+  "swat_up_0": {
+   "src": "sprites/swat_up_0.png",
+   "w": 64,
+   "h": 64
+  },
+  "swat_up_1": {
+   "src": "sprites/swat_up_1.png",
+   "w": 64,
+   "h": 64
+  },
+  "swat_up_2": {
+   "src": "sprites/swat_up_2.png",
+   "w": 64,
+   "h": 64
+  },
+  "swat_up_3": {
+   "src": "sprites/swat_up_3.png",
+   "w": 64,
+   "h": 64
+  },
+  "swat_left_0": {
+   "src": "sprites/swat_left_0.png",
+   "w": 64,
+   "h": 64
+  },
+  "swat_left_1": {
+   "src": "sprites/swat_left_1.png",
+   "w": 64,
+   "h": 64
+  },
+  "swat_left_2": {
+   "src": "sprites/swat_left_2.png",
+   "w": 64,
+   "h": 64
+  },
+  "swat_left_3": {
+   "src": "sprites/swat_left_3.png",
+   "w": 64,
+   "h": 64
+  },
+  "swat_right_0": {
+   "src": "sprites/swat_right_0.png",
+   "w": 64,
+   "h": 64
+  },
+  "swat_right_1": {
+   "src": "sprites/swat_right_1.png",
+   "w": 64,
+   "h": 64
+  },
+  "swat_right_2": {
+   "src": "sprites/swat_right_2.png",
+   "w": 64,
+   "h": 64
+  },
+  "swat_right_3": {
+   "src": "sprites/swat_right_3.png",
+   "w": 64,
+   "h": 64
+  },
+  "mg_plate0": {
+   "src": "sprites/mg_plate0.png",
+   "w": 101,
+   "h": 234
+  },
+  "mg_plate1": {
+   "src": "sprites/mg_plate1.png",
+   "w": 167,
+   "h": 230
+  },
+  "mg_plate2": {
+   "src": "sprites/mg_plate2.png",
+   "w": 160,
+   "h": 236
+  },
+  "mg_plate3": {
+   "src": "sprites/mg_plate3.png",
+   "w": 166,
+   "h": 230
+  },
+  "mg_plate4": {
+   "src": "sprites/mg_plate4.png",
+   "w": 221,
+   "h": 230
+  },
+  "mg_cylinder": {
+   "src": "sprites/mg_cylinder.png",
+   "w": 100,
+   "h": 102
+  },
+  "mg_pick": {
+   "src": "sprites/mg_pick.png",
+   "w": 16,
+   "h": 166
+  },
+  "mg_pickbroken": {
+   "src": "sprites/mg_pickbroken.png",
+   "w": 127,
+   "h": 105
+  },
+  "mg_chest": {
+   "src": "sprites/mg_chest.png",
+   "w": 200,
+   "h": 190
+  },
+  "mg_desk": {
+   "src": "sprites/mg_desk.png",
+   "w": 235,
+   "h": 203
+  },
+  "mg_computer": {
+   "src": "sprites/mg_computer.png",
+   "w": 488,
+   "h": 492
+  },
+  "mg_lockout": {
+   "src": "sprites/mg_lockout.png",
+   "w": 290,
+   "h": 221
+  },
+  "mg_icon_lock": {
+   "src": "sprites/mg_icon_lock.png",
+   "w": 13,
+   "h": 30
+  },
+  "mg_icon_term": {
+   "src": "sprites/mg_icon_term.png",
+   "w": 34,
+   "h": 34
+  }
+ },
+ "groups": {
+  "ground_dirt": [
+   "g_dirt0",
+   "g_dirt1",
+   "g_dirt2",
+   "g_dirt3",
+   "g_dirt4",
+   "g_dirt5",
+   "g_dirt6",
+   "g_dirt7"
+  ],
+  "ground_dark": [
+   "g_dark0",
+   "g_dark1"
+  ],
+  "ground_grass": [
+   "g_grass0",
+   "g_grass1",
+   "g_grass2",
+   "g_grass3",
+   "g_grass4",
+   "g_grass5",
+   "g_grass6",
+   "g_grass7"
+  ],
+  "ground_misc": [
+   "g_misc0",
+   "g_misc1",
+   "g_misc2"
+  ],
+  "ground_paved": [
+   "g_paved0",
+   "g_paved1",
+   "g_paved2"
+  ],
+  "fog": [
+   "fog0",
+   "fog1",
+   "fog2",
+   "fog3"
+  ],
+  "floor_in": [
+   "floor0",
+   "floor1",
+   "floor2",
+   "floor3",
+   "floor4",
+   "floor5",
+   "floor6",
+   "floor7"
+  ],
+  "wall": [
+   "wall0",
+   "wall1",
+   "wall2",
+   "wall3",
+   "wall4",
+   "wall5",
+   "wall6",
+   "wall7",
+   "wall8",
+   "wall9",
+   "wall10",
+   "wall11",
+   "wall12",
+   "wall13",
+   "wall14",
+   "wall15"
+  ],
+  "bwall": [
+   "bwall0",
+   "bwall1",
+   "bwall2",
+   "bwall3",
+   "bwall4",
+   "bwall5",
+   "bwall6",
+   "bwall7",
+   "bwall8",
+   "bwall9",
+   "bwall10",
+   "bwall11",
+   "bwall12",
+   "bwall13",
+   "bwall14",
+   "bwall15"
+  ],
+  "ruinwall": [
+   "ruinwall0",
+   "ruinwall1",
+   "ruinwall2",
+   "ruinwall3",
+   "ruinwall4",
+   "ruinwall5",
+   "ruinwall6",
+   "ruinwall7",
+   "ruinwall8",
+   "ruinwall9",
+   "ruinwall10",
+   "ruinwall11",
+   "ruinwall12",
+   "ruinwall13",
+   "ruinwall14",
+   "ruinwall15"
+  ],
+  "prop_out": [
+   "prop_rubble0",
+   "prop_rubble1",
+   "prop_rubble2",
+   "prop_rubble3",
+   "prop_rubble4",
+   "prop_rubble5",
+   "prop_rubble6",
+   "prop_sandbags",
+   "prop_barrier0",
+   "prop_barrier1",
+   "prop_boulder",
+   "prop_rocks0",
+   "prop_rocks1",
+   "prop_debris0",
+   "prop_debris1",
+   "prop_crate",
+   "prop_barrel0",
+   "prop_barrel1",
+   "prop_barrel2",
+   "prop_tire",
+   "prop_bin",
+   "prop_planks",
+   "prop_stump",
+   "prop_bush0",
+   "prop_bush1"
+  ],
+  "furniture": [
+   "furn52",
+   "furn53",
+   "furn54",
+   "furn55",
+   "furn56",
+   "furn57",
+   "furn59",
+   "furn60",
+   "furn62",
+   "furn63",
+   "furn64",
+   "furn65",
+   "furn66",
+   "furn70",
+   "furn73",
+   "furn75",
+   "furn76",
+   "furn77",
+   "furn78",
+   "furn79",
+   "furn80",
+   "furn82",
+   "furn86",
+   "furn87",
+   "furn89",
+   "furn90",
+   "furn91",
+   "furn92",
+   "furn93",
+   "furn95",
+   "furn97",
+   "furn99"
+  ],
+  "decor": [
+   "decor_tree_dead",
+   "decor_bush",
+   "decor_tent",
+   "decor_crates",
+   "decor_barrel",
+   "decor_rubble_big",
+   "decor_rubble_big2",
+   "decor_flag",
+   "decor_tree"
+  ],
+  "buildings": [
+   "bld0",
+   "bld1",
+   "bld2",
+   "bld3",
+   "bld4",
+   "bld5",
+   "bld6",
+   "bld7"
+  ],
+  "minigame": [
+   "mg_plate0",
+   "mg_plate1",
+   "mg_plate2",
+   "mg_plate3",
+   "mg_plate4",
+   "mg_cylinder",
+   "mg_pick",
+   "mg_pickbroken",
+   "mg_chest",
+   "mg_desk",
+   "mg_computer",
+   "mg_lockout",
+   "mg_icon_lock",
+   "mg_icon_term"
+  ]
+ }
+}

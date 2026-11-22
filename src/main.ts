@@ -27,8 +27,13 @@ import { Hud } from './ui/hud.js';
 import { sfx } from './audio/sfx.js';
 import { MinigameOverlay } from './ui/minigames.js';
 import { renderSafehouse } from './ui/safehouse.js';
-import type { GameEvent } from './core/types.js';
+import type { GameEvent, StoryKey } from './core/types.js';
 import { Night } from './night/night.js';
+import { ProgressionService } from './progress/service.js';
+import type { MissionCategory, ProgEvent } from './progress/types.js';
+import { Notices, rewardText } from './ui/notices.js';
+import { renderMissions } from './ui/missions.js';
+import { renderProfile } from './ui/profile.js';
 import { NightRenderer } from './render/nightRenderer.js';
 import { towerSlotsUnlocked } from './night/night.js';
 
@@ -61,6 +66,30 @@ class Game {
   /** True while a dialog is open over an expedition: the world stands still. */
   private paused = false;
   private confirmResolve: ((ok: boolean) => void) | null = null;
+  /** Level-ups, achievements and mission notices (non-blocking). */
+  private notices = new Notices($('notices'));
+  private svc: ProgressionService | null = null;
+  private svcBase: BaseState | null = null;
+  private missionsTab: MissionCategory = 'daily';
+
+  /**
+   * The progression service for the current save. It is rebuilt whenever the save object is replaced (New Game, import),
+   * and persists the save itself after every change.
+   */
+  private get prog(): ProgressionService | null {
+    const b = this.base;
+    if (!b) return null;
+    if (!this.svc || this.svcBase !== b) {
+      this.svcBase = b;
+      this.svc = new ProgressionService(b, () => this.persist(), { listener: (n) => this.notices.handle(n) });
+    }
+    return this.svc;
+  }
+
+  /** Report a gameplay event to progression. Practice and Quick Play runs never reach this (nothing is saved there). */
+  private report(ev: ProgEvent): { xp: number } {
+    return this.prog?.handle(ev) ?? { xp: 0 };
+  }
 
   /** Themed replacement for window.confirm(). Resolves true on confirm. */
   confirmDialog(title: string, text: string, yes = 'Confirm', no = 'Cancel'): Promise<boolean> {
@@ -97,7 +126,7 @@ class Game {
   }
 
   /** What is being played, so Retry can replay the same map and Next can roll a new one. */
-  private run: { kind: 'test' } | { kind: 'gen' | 'quick'; difficulty: Difficulty; seed: number; region: Region } = { kind: 'test' };
+  private run: { kind: 'test' } | { kind: 'gen' | 'quick'; difficulty: Difficulty; seed: number; region: Region; runId?: string; story?: StoryKey[] } = { kind: 'test' };
 
   /** Start a freshly generated expedition (random seed unless one is given). */
   startGenerated(difficulty: Difficulty, seed = Math.floor(Math.random() * 1_000_000) + 1, region: Region = this.region): void {
@@ -108,7 +137,9 @@ class Game {
       this.kit = kit;
       this.persist();
     } else this.kit = undefined;
-    this.run = { kind: 'gen', difficulty, seed, region };
+    // while a campaign step asks for a story item, this map is generated with it inside a building
+    const story = this.prog?.storyItemsFor(difficulty) ?? [];
+    this.run = { kind: 'gen', difficulty, seed, region, runId: `${Date.now().toString(36)}-${seed}`, story };
     this.launch();
   }
 
@@ -133,7 +164,7 @@ class Game {
     this.saveTimer += dt;
     if (!force && this.saveTimer < 2) return;
     this.saveTimer = 0;
-    b.expedition = { difficulty: this.run.difficulty, seed: this.run.seed, region: this.run.region, snap: l.snapshot() };
+    b.expedition = { difficulty: this.run.difficulty, seed: this.run.seed, region: this.run.region, runId: this.run.runId, story: this.run.story, snap: l.snapshot() };
     this.persist();
   }
 
@@ -143,7 +174,7 @@ class Game {
     note.textContent = 'Surveying the wasteland…';
     note.hidden = false;
     const r = this.run;
-    void generateAsync(r.difficulty, r.seed, r.region).then((d) => {
+    void generateAsync(r.difficulty, r.seed, r.region, r.kind === 'gen' ? r.story : undefined).then((d) => {
       this.mapData = d;
       this.start();
       note.hidden = true;
@@ -164,7 +195,7 @@ class Game {
     if (!e) return;
     this.kit = undefined;
     this.pendingSnap = e.snap as LevelSnapshot;
-    this.run = { kind: 'gen', difficulty: e.difficulty, seed: e.seed, region: e.region as Region };
+    this.run = { kind: 'gen', difficulty: e.difficulty, seed: e.seed, region: e.region as Region, runId: e.runId ?? `v20-${e.seed}-${e.difficulty}`, story: e.story };
     this.launch();
   }
 
@@ -188,7 +219,7 @@ class Game {
     this.renderer.resize();
     this.hud.setLevelName(this.level.name);
     this.hud.show(true);
-    for (const id of ['menu', 'results', 'options', 'choose', 'safehouse', 'night', 'quick']) $(id).hidden = true;
+    for (const id of ['menu', 'results', 'options', 'choose', 'safehouse', 'night', 'quick', 'missions', 'profile']) $(id).hidden = true;
     if (localStorage.getItem(TIPS_KEY) !== '0') {
       this.hud.toast('Tap to move · hold a square, then slide up to reveal or down to flag (right-click also flags) · find the open manhole', 5000);
     }
@@ -197,7 +228,7 @@ class Game {
   showMenu(): void {
     this.hud.show(false);
     this.level = null;
-    for (const id of ['results', 'options', 'choose', 'safehouse', 'night', 'quick', 'load', 'how']) $(id).hidden = true;
+    for (const id of ['results', 'options', 'choose', 'safehouse', 'night', 'quick', 'load', 'how', 'missions', 'profile']) $(id).hidden = true;
     ($('m-load') as HTMLButtonElement).disabled = false;
     ($('m-continue') as HTMLButtonElement).disabled = !this.base;
     $('menu').hidden = false;
@@ -214,14 +245,21 @@ class Game {
     if (!b) return this.showMenu();
     this.hud.show(false);
     this.level = null;
-    for (const id of ['menu', 'results', 'options', 'choose', 'night']) $(id).hidden = true;
+    for (const id of ['menu', 'results', 'options', 'choose', 'night', 'missions', 'profile']) $(id).hidden = true;
+    const prog = this.prog!;
+    prog.refresh(); // a new day or week may have begun since the last visit
+    const lv = prog.level();
     renderSafehouse($('safehouse'), b, {
+      missions: () => this.showMissions(),
+      profile: () => this.showProfile(),
+      prog: { level: lv.level, pct: lv.pct, into: lv.into, need: lv.need, maxed: lv.maxed, unclaimed: prog.unclaimed() },
       expedition: () => this.showChoose(),
       sleep: () => this.sleep(),
       upgrade: (f) => {
         if (upgrade(b, f)) {
           sfx.play('upgrade');
           this.persist();
+          this.report({ type: 'facilityUpgraded', facility: f, level: b.facilities[f] });
         }
         this.showSafehouse();
       },
@@ -244,6 +282,40 @@ class Game {
     $('safehouse').hidden = false;
   }
 
+  showMissions(): void {
+    const prog = this.prog;
+    if (!prog) return this.showMenu();
+    prog.refresh();
+    for (const id of ['safehouse', 'profile']) $(id).hidden = true;
+    renderMissions($('missions'), prog, {
+      tab: this.missionsTab,
+      setTab: (c) => {
+        this.missionsTab = c;
+        this.showMissions();
+      },
+      claim: (id) => {
+        const r = prog.claim(id);
+        if (r.ok) {
+          sfx.play('claim');
+          const lost = r.lost && Object.keys(r.lost).length ? ` (storage full: ${rewardText(r.lost)} lost)` : '';
+          this.notices.info('Reward claimed', `${rewardText(r.reward ?? {})}${lost}`);
+        }
+        this.showMissions();
+      },
+      back: () => this.showSafehouse(),
+    });
+    $('missions').hidden = false;
+  }
+
+  showProfile(): void {
+    const prog = this.prog;
+    if (!prog) return this.showMenu();
+    prog.refresh();
+    $('safehouse').hidden = true;
+    renderProfile($('profile'), prog, () => this.showSafehouse());
+    $('profile').hidden = false;
+  }
+
   private showChoose(): void {
     const b = this.base;
     $('safehouse').hidden = true;
@@ -255,9 +327,19 @@ class Game {
       btn.classList.toggle('off', !ok);
     });
     this.renderRegions();
+    this.renderStoryHint();
     $('c-stamina').textContent = b
       ? `Stamina ${b.stamina} left today. Safe costs 1, Scouting 2, Risky 3. Harder runs pay more.`
       : 'Every expedition is a freshly generated map. Harder runs pay more loot.';
+  }
+
+  /** Tell the player when a campaign objective can be found out there (Scouting and Risky only). */
+  private renderStoryHint(): void {
+    const items = this.prog?.storyItemsFor('scouting') ?? [];
+    const el = $('c-story');
+    const names = items.map((k) => (k === 'transmitter' ? 'a military radio transmitter' : 'a member of the missing research team'));
+    el.textContent = names.length ? `Campaign: ${names.join(' and ')} may be inside a building on Scouting and Risky expeditions.` : '';
+    el.hidden = !names.length;
   }
 
   /** Rest until night: the safehouse is attacked unless the player skips it. */
@@ -339,6 +421,7 @@ class Game {
     const n = this.night;
     if (!b || !n) return;
     const r = n.result();
+    const nightId = `night:${b.day}:${b.pendingNight?.seed ?? 0}`;
     let defence = 'The barricades held through a quiet night.';
     if (!skipped) {
       const out = applyNight(b, { won: r.won, killed: r.killed, materialsSpent: r.materialsSpent });
@@ -354,6 +437,8 @@ class Game {
     sfx.play(skipped || r.won ? 'win' : 'lose');
     const rep = endDay(b);
     this.persist();
+    const nightXp = this.report({ type: 'nightEnded', id: nightId, won: r.won, skipped, killed: r.killed }).xp;
+    this.report({ type: 'dayReached', day: b.day });
     $('n-title').textContent = `Night ${rep.day}`;
     const lines = [
       defence,
@@ -362,6 +447,7 @@ class Game {
       rep.left.length ? `Short of food, ${rep.left.map((s) => `${s.name} (${ROLES[s.role].label})`).join(' and ')} left in the dark.` : '',
       rep.starving && !rep.left.length ? 'You went hungry. Find food.' : '',
       `Day ${b.day} begins. Stamina restored.`,
+      nightXp > 0 ? `+${nightXp} XP` : '',
     ].filter(Boolean);
     $('n-body').textContent = lines.join('\n');
     $('night').hidden = false;
@@ -377,16 +463,54 @@ class Game {
       this.base.expedition = null;
       returnHome(this.base, { ...l.results(), status: 'failed' });
       this.persist();
+      this.reportExpedition(l, false, 0, 0);
       this.resultsShown = true;
     }
     if (this.base) this.showSafehouse();
     else this.showMenu();
   }
 
+  /** An expedition has been decided (escaped, died or abandoned): pay out progression exactly once. */
+  private reportExpedition(level: Level, escaped: boolean, rescued: number, scrap: number): { xp: number } {
+    const run = this.run;
+    if (run.kind !== 'gen') return { xp: 0 };
+    return this.report({
+      type: 'expeditionEnded',
+      id: `exp:${run.runId ?? run.seed}`,
+      difficulty: run.difficulty,
+      region: run.region,
+      escaped,
+      damageTaken: level.damageTaken,
+      rescued: escaped ? rescued : 0,
+      scrap: escaped ? scrap : 0,
+      story: escaped ? { ...level.story } : { transmitter: 0, researcher: 0 },
+    });
+  }
+
+  /**
+   * Kills and vaults are credited as they happen. Each credit is followed at once by a save of the expedition snapshot,
+   * so what was credited and what a reload resumes can never disagree (no re-killing the same zombie after a reload).
+   */
+  private reportLevelEvents(events: GameEvent[]): void {
+    const run = this.run;
+    if (run.kind !== 'gen' || !this.base) return;
+    let any = false;
+    for (const e of events) {
+      if (e.type === 'zombieKilled' || e.type === 'swatKilled') {
+        this.report({ type: 'zombieKilled', amount: 1 });
+        any = true;
+      } else if (e.type === 'vaultOpened') {
+        this.report({ type: 'vaultOpened', id: `vault:${run.runId ?? run.seed}:${e.vault}` });
+        any = true;
+      }
+    }
+    if (any) this.autosaveExpedition(0, true);
+  }
+
   private playEvents(events: GameEvent[]): void {
     for (const e of events) {
       switch (e.type) {
-        case 'pickup': sfx.play(e.id === 'survivor' ? 'rescue' : 'pickup'); break;
+        case 'pickup': sfx.play(e.id === 'survivor' || e.id === 'researcher' ? 'rescue' : 'pickup'); break;
         case 'damage': sfx.play(e.absorbed ? 'shield' : 'hurt'); break;
         case 'mineTriggered': sfx.play('mine'); break;
         case 'zombieKilled': case 'swatKilled': sfx.play('kill'); break;
@@ -414,6 +538,7 @@ class Game {
       const events = level.drainEvents();
       this.renderer.handleEvents(level, events);
       this.playEvents(events);
+      this.reportLevelEvents(events);
       if (level.minigame && !this.minigames.isOpen) {
         const v = level.minigame;
         this.minigames.open(v, (outcome) => level.resolveMinigame(outcome));
@@ -447,17 +572,24 @@ class Game {
     $('r-sub').textContent = won ? `${level.name} complete` : this.base && this.run.kind === 'gen' ? 'The wasteland claimed you. Everything you found is lost.' : 'The wasteland claimed you. Try again.';
     const gen = this.base && this.run.kind === 'gen';
     let extra = '';
+    let xpLine = '';
     if (gen && this.base) {
       this.base.expedition = null;
       const rep = returnHome(this.base, r);
       this.persist();
+      const xp = this.reportExpedition(level, won, rep.recruited.length, rep.gained.scrap + rep.lost.scrap).xp;
+      if (xp > 0) xpLine = `+${xp} XP`;
       if (won) {
+        if (level.story.transmitter) extra += 'Radio transmitter recovered.\n';
+        if (level.story.researcher) extra += `${level.story.researcher} research-team member${level.story.researcher === 1 ? '' : 's'} brought home.\n`;
         const lostAny = rep.lost.scrap + rep.lost.food + rep.lost.materials;
         if (rep.recruited.length) extra += rep.recruited.map((s) => `${s.name} the ${ROLES[s.role].label} joined the safehouse.`).join('\n') + '\n';
         if (lostAny) extra += `Storage full: ${lostAny} resources left behind.`;
       }
     }
     $('r-extra').textContent = extra;
+    $('r-xp').textContent = xpLine;
+    $('r-xp').hidden = !xpLine;
     const mm = Math.floor(r.timeSeconds / 60);
     const ss = String(Math.floor(r.timeSeconds % 60)).padStart(2, '0');
     $('r-time').textContent = `${mm}:${ss}`;

@@ -1,4 +1,5 @@
 import type { LevelData } from '../core/level.js';
+import type { StoryKey } from '../core/types.js';
 import type { Difficulty, Region } from './difficulty.js';
 import { generateExpedition } from './generate.js';
 
@@ -35,13 +36,13 @@ function spawn(): Worker | null {
 }
 
 /** Generate an expedition in a Web Worker, falling back to the main thread if workers are unavailable. */
-export function generateAsync(difficulty: Difficulty, seed: number, region: Region): Promise<LevelData> {
+export function generateAsync(difficulty: Difficulty, seed: number, region: Region, story: readonly StoryKey[] = []): Promise<LevelData> {
   const w = spawn();
-  const sync = (): Promise<LevelData> => new Promise((res) => window.setTimeout(() => res(generateExpedition(difficulty, seed, region).data), 20));
+  const sync = (): Promise<LevelData> => new Promise((res) => window.setTimeout(() => res(generateExpedition(difficulty, seed, region, story).data), 20));
   if (!w) return sync();
   return new Promise<LevelData>((ok, fail) => {
     const id = nextId++;
     waiting.set(id, { ok, fail });
-    w.postMessage({ id, difficulty, seed, region });
+    w.postMessage({ id, difficulty, seed, region, story: [...story] });
   }).catch(sync);
 }

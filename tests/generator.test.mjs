@@ -236,3 +236,59 @@ test('every region generates valid, solvable maps', async () => {
     }
   }
 });
+
+// ───────────── v22: campaign story items ─────────────
+
+test('story items: placed once each, indoors, only when requested; maps stay solvable and the items collectable', () => {
+  for (const tier of ['scouting', 'risky']) {
+    const n = tier === 'risky' ? 3 : 10;
+    for (let seed = 1; seed <= n; seed++) {
+      const plain = generateExpedition(tier, seed);
+      assert.equal(count(plain, 'T') + count(plain, 'Q'), 0);
+      const g = generateExpedition(tier, seed, 'wasteland', ['transmitter', 'researcher']);
+      assert.equal(count(g, 'T'), 1, `${tier}#${seed} transmitter`);
+      assert.equal(count(g, 'Q'), 1, `${tier}#${seed} researcher`);
+      for (const ch of ['T', 'Q']) {
+        const i = g.data.cells.findIndex((c) => c.pickup === (ch === 'T' ? 'transmitter' : 'researcher'));
+        assert.ok(i >= 0);
+        assert.equal(g.data.zones[i], 'in', 'story items are inside a building');
+      }
+      const won = solveLevel(g.data);
+      assert.equal(won.reason, 'won');
+      assert.equal(won.damage, 0);
+      const sealed = solveLevel(parseLevel({ name: 'sealed', rows: g.ascii.rows.map((r) => r.replace('E', '#')) }));
+      assert.equal(sealed.damage, 0);
+      assert.equal(sealed.level.cells.filter((c) => c.pickup).length, 0, 'everything, story items included, is collected');
+    }
+  }
+});
+
+test('story items: a single requested item, same seed gives the same map, and the plain map is unchanged', () => {
+  const a = generateExpedition('scouting', 5, 'forest', ['transmitter']);
+  const b = generateExpedition('scouting', 5, 'forest', ['transmitter']);
+  assert.deepEqual(a.ascii.rows, b.ascii.rows);
+  assert.equal(count(a, 'T'), 1);
+  assert.equal(count(a, 'Q'), 0);
+  const p1 = generateExpedition('scouting', 5, 'forest');
+  const p2 = generateExpedition('scouting', 5, 'forest', []);
+  assert.deepEqual(p1.ascii.rows, p2.ascii.rows);
+});
+
+test('story pickups: carried out as story counters, researchers also count as rescued survivors, both survive snapshot/restore', () => {
+  const l = make(['#######', '#S.TQ.#', '#######']);
+  l.tap(3, 1);
+  for (let i = 0; i < 80; i++) l.update(0.05);
+  l.tap(4, 1);
+  for (let i = 0; i < 80; i++) l.update(0.05);
+  assert.deepEqual(l.story, { transmitter: 1, researcher: 1 });
+  assert.equal(l.rescued, 1);
+  assert.deepEqual(l.results().story, { transmitter: 1, researcher: 1 });
+  const l2 = make(['#######', '#S.TQ.#', '#######']);
+  l2.restore(l.snapshot());
+  assert.deepEqual(l2.story, { transmitter: 1, researcher: 1 });
+  const old = l.snapshot();
+  delete old.story;
+  const l3 = make(['#######', '#S.TQ.#', '#######']);
+  assert.ok(l3.restore(old));
+  assert.deepEqual(l3.story, { transmitter: 0, researcher: 0 });
+});

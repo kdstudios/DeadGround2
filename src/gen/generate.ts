@@ -3,7 +3,7 @@ import { parseLevel, type AsciiLevel } from '../levels/parse.js';
 import { solveLevel, type SolveReport } from '../solver/solve.js';
 import { DIFFICULTIES, REGIONS, withRegion, type Difficulty, type DifficultyParams, type GateChar, type Region } from './difficulty.js';
 import { Rng } from './rng.js';
-import type { PickupId, Pos, Vault, VaultKind } from '../core/types.js';
+import type { PickupId, Pos, StoryKey, Vault, VaultKind } from '../core/types.js';
 
 export interface GeneratedLevel {
   data: LevelData;
@@ -68,11 +68,11 @@ const TOOL_OF = { z: 'a', D: 'k', b: 'c', X: 'e' } as const;
  * is removed and it tries again, so every returned map can be finished without a guess and without
  * taking a single hit. Maps that can't be repaired are discarded and regenerated.
  */
-export function generateExpedition(difficulty: Difficulty, seed: number, region: Region = 'wasteland'): GeneratedLevel {
+export function generateExpedition(difficulty: Difficulty, seed: number, region: Region = 'wasteland', story: readonly StoryKey[] = []): GeneratedLevel {
   const P = withRegion(DIFFICULTIES[difficulty], region);
   for (let attempt = 0; attempt < 200; attempt++) {
     const rng = new Rng((seed * 7919 + attempt * 104729) >>> 0);
-    const g = build(P, rng);
+    const g = build(P, rng, story);
     if (!g) continue;
     const res = repair(P, g);
     if (!res) continue;
@@ -129,7 +129,7 @@ interface Built {
   floorCells: number;
 }
 
-function build(P: DifficultyParams, rng: Rng): Built | null {
+function build(P: DifficultyParams, rng: Rng, story: readonly StoryKey[] = []): Built | null {
   const W = P.width;
   const H = P.height;
   const grid: string[][] = Array.from({ length: H }, (_, y) =>
@@ -408,6 +408,10 @@ function build(P: DifficultyParams, rng: Rng): Built | null {
   for (const [ch, n, cells] of spares) for (let i = 0; i < n; i++) putAt(cells, ch);
   // stranded survivors wait inside buildings
   for (let i = 0; i < P.survivors; i++) putAt(indoorCells, 'v');
+  // campaign story items (only requested while the matching campaign step is active): always inside a building.
+  // They are ordinary pickups for the solver, so the "everything is reachable without a guess" check covers them.
+  // A map that cannot hold one is thrown away and regenerated.
+  for (const k of story) if (!putAt(indoorCells, k === 'transmitter' ? 'T' : 'Q')) return null;
   // loot: two thirds inside the buildings (the reward for exploring them), the rest out in the open
   const inLoot = indoorCells.length ? Math.round(P.loot * 0.66) : 0;
   for (let i = 0; i < P.loot; i++) putAt(i < inLoot ? indoorCells : outdoorCells, rng.pick(['s', 'f', 't']));

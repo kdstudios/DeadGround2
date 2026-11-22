@@ -15,6 +15,7 @@ import type {
   ObjectId,
   Patrol,
   PickupId,
+  StoryKey,
   Pos,
   Results,
 } from './types.js';
@@ -87,6 +88,10 @@ export interface LevelSnapshot {
   time: number;
   patrols: Patrol[];
   vaults: Vault['status'][];
+  /** Hearts lost so far (absent in snapshots written before v21). */
+  damageTaken?: number;
+  /** Story items carried (absent in older snapshots). */
+  story?: Record<StoryKey, number>;
 }
 
 export class Level {
@@ -108,6 +113,10 @@ export class Level {
   inventory: Record<InventoryKey, number> = { ammo: 0, key: 0, crowbar: 0, explosive: 0, map: 0 };
   loot: Record<LootKey, number> = { scrap: 0, food: 0, materials: 0 };
   rescued = 0;
+  /** Campaign story items carried this run. */
+  story: Record<StoryKey, number> = { transmitter: 0, researcher: 0 };
+  /** Hearts lost this run (a shield-absorbed hit costs none). Feeds the "Untouchable" achievement. */
+  damageTaken = 0;
   patrols: Patrol[] = [];
   status: LevelStatus = 'playing';
   time = 0;
@@ -171,6 +180,8 @@ export class Level {
       time: this.time,
       patrols: this.patrols.map((p) => ({ ...p, route: p.route.map((r) => ({ ...r })) })),
       vaults: this.vaults.map((v) => v.status),
+      damageTaken: this.damageTaken,
+      story: { ...this.story },
     };
   }
 
@@ -197,6 +208,8 @@ export class Level {
     this.time = s.time;
     this.patrols = s.patrols.map((p) => ({ ...p, route: p.route.map((r) => ({ ...r })) }));
     s.vaults.forEach((st, i) => (this.vaults[i]!.status = st));
+    this.story = { transmitter: s.story?.transmitter ?? 0, researcher: s.story?.researcher ?? 0 };
+    this.damageTaken = s.damageTaken ?? 1; // an old snapshot cannot prove the run was clean
     this.path = [];
     this.intent = null;
     this.goal = null;
@@ -270,6 +283,7 @@ export class Level {
     return { status: this.status, timeSeconds: this.time, loot: { ...this.loot },
       heartsLeft: this.hearts,
       rescued: this.rescued,
+      story: { ...this.story },
       kit: { ammo: this.inventory.ammo, explosive: this.inventory.explosive, map: this.inventory.map, shield: this.shield },
     };
   }
@@ -705,6 +719,10 @@ export class Level {
         break;
       case 'survivor':
         this.rescued += amount;
+        if (def.story) this.story[def.story] += amount;
+        break;
+      case 'story':
+        this.story[def.key] += amount;
         break;
       case 'heal':
         this.hearts = Math.min(CONFIG.maxHearts, this.hearts + CONFIG.medkitHeal * amount);
@@ -721,6 +739,8 @@ export class Level {
       this.events.push({ type: 'damage', source, amount, absorbed: true, at });
       return;
     }
+    const lost = Math.min(this.hearts, amount);
+    this.damageTaken += lost;
     this.hearts = Math.max(0, this.hearts - amount);
     this.events.push({ type: 'damage', source, amount, absorbed: false, at });
     if (this.hearts <= 0) {

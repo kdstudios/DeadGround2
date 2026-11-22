@@ -7,7 +7,8 @@ const KEY = 'deadground.sound';
 export type Sfx =
   | 'click' | 'step' | 'pickup' | 'rescue' | 'hurt' | 'shield' | 'mine' | 'shoot' | 'zombie' | 'door' | 'bomb' | 'win' | 'lose'
   | 'snap' | 'deny' | 'confirm' | 'tick' | 'alarm'
-  | 'arrow' | 'hit' | 'kill' | 'gateHit' | 'gateBreak' | 'repair' | 'coreHit' | 'upgrade';
+  | 'arrow' | 'hit' | 'kill' | 'gateHit' | 'gateBreak' | 'repair' | 'coreHit' | 'upgrade'
+  | 'levelup' | 'achievement' | 'claim';
 
 class Audio {
   private ctx: AudioContext | null = null;
@@ -100,6 +101,9 @@ class Audio {
       case 'gateBreak': this.noise(0.45, 0.6, 900); return this.tone(80, 0.3, 'square', 0.3, 40);
       case 'repair': this.tone(420, 0.06, 'square', 0.18); return this.tone(560, 0.06, 'square', 0.18, undefined, 0.08);
       case 'coreHit': return this.tone(120, 0.25, 'sawtooth', 0.28, 60);
+      case 'levelup': [392, 494, 587, 784, 988].forEach((f, i) => this.tone(f, 0.22, 'triangle', 0.28, undefined, i * 0.09)); return;
+      case 'achievement': this.tone(660, 0.12, 'triangle', 0.26); return this.tone(880, 0.22, 'triangle', 0.26, undefined, 0.1);
+      case 'claim': this.tone(500, 0.07, 'square', 0.16); return this.tone(750, 0.12, 'triangle', 0.26, undefined, 0.07);
       case 'upgrade': [440, 554, 659].forEach((f, i) => this.tone(f, 0.15, 'triangle', 0.25, undefined, i * 0.09)); return;
     }
   }

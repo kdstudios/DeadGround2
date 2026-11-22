@@ -27,6 +27,10 @@ export interface SafehouseActions {
   /** Show the first-run tips banner. */
   tips: boolean;
   hideTips(): void;
+  missions(): void;
+  profile(): void;
+  /** Player level summary for the Operator plate. */
+  prog: { level: number; pct: number; into: number; need: number; maxed: boolean; unclaimed: number };
 }
 
 const icon = (n: string): string => `<img src="assets/sprites/${n}.png" alt="">`;
@@ -105,6 +109,15 @@ export function renderSafehouse(root: HTMLElement, s: BaseState, act: SafehouseA
     </div>
 
     <aside class="sh-brief">
+      <div class="op plate">
+        <div class="op-row"><div class="op-lvl"><small>Lv</small><b>${act.prog.level}</b></div>
+          <div class="op-xp"><span>Operator</span><div class="bar xp" role="progressbar" aria-valuenow="${act.prog.into}" aria-valuemax="${act.prog.need}"><i style="width:${Math.round(act.prog.pct * 100)}%"></i></div>
+          <em>${act.prog.maxed ? 'Max level' : `${act.prog.into} / ${act.prog.need} XP`}</em></div></div>
+        <div class="op-btns">
+          <button class="act" id="sh-missions">Missions${act.prog.unclaimed ? ` <em class="pip">${act.prog.unclaimed}</em>` : ''}</button>
+          <button class="act" id="sh-profile">Profile</button>
+        </div>
+      </div>
       <div class="side plate">
         <h3 class="plate-h">Daily brief</h3>
         <div class="brief-rows">
@@ -143,6 +156,8 @@ export function renderSafehouse(root: HTMLElement, s: BaseState, act: SafehouseA
   root.querySelector('#sh-exp')!.addEventListener('click', act.expedition);
   root.querySelector('#sh-sleep')!.addEventListener('click', act.sleep);
   root.querySelector('#sh-menu')!.addEventListener('click', act.menu);
+  root.querySelector('#sh-missions')!.addEventListener('click', act.missions);
+  root.querySelector('#sh-profile')!.addEventListener('click', act.profile);
   root.querySelectorAll<HTMLElement>('[data-up]').forEach((b) => b.addEventListener('click', () => act.upgrade(b.dataset.up as Facility)));
   root.querySelectorAll<HTMLElement>('[data-craft]').forEach((b) => b.addEventListener('click', () => act.craft(b.dataset.craft as CraftItem)));
 }

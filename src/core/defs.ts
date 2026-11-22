@@ -1,4 +1,4 @@
-import type { InventoryKey, LootKey, ObjectId, PickupId } from './types.js';
+import type { InventoryKey, LootKey, ObjectId, PickupId, StoryKey } from './types.js';
 
 /**
  * Data-driven definitions. To add a new obstacle or pickup, add an entry here
@@ -94,7 +94,8 @@ export type PickupKind =
   | { kind: 'inventory'; key: InventoryKey }
   | { kind: 'shield' }
   | { kind: 'heal' }
-  | { kind: 'survivor' };
+  | { kind: 'survivor'; story?: StoryKey }
+  | { kind: 'story'; key: StoryKey };
 
 export const PICKUPS: Record<PickupId, PickupKind> = {
   scrap: { kind: 'loot', key: 'scrap' },
@@ -108,6 +109,10 @@ export const PICKUPS: Record<PickupId, PickupKind> = {
   shield: { kind: 'shield' },
   medkit: { kind: 'heal' },
   survivor: { kind: 'survivor' },
+  /** Military radio set: a campaign objective. */
+  transmitter: { kind: 'story', key: 'transmitter' },
+  /** A member of the missing research team: joins the safehouse like any survivor, and counts for the campaign. */
+  researcher: { kind: 'survivor', story: 'researcher' },
 };
 
 /** Items the player can aim at an area (3x3 around themselves) before confirming. */

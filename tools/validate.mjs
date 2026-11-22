@@ -7,6 +7,8 @@ import { parseLevel } from '../dist/levels/parse.js';
 
 const REGION = process.argv[4] ?? 'wasteland';
 const per = Number(process.argv[2] ?? 100);
+// STORY=1 generates every Scouting / Risky map with both campaign story items and checks they are collected too
+const STORY = process.env.STORY === '1' ? ['transmitter', 'researcher'] : [];
 const first = Number(process.argv[3] ?? 1);
 let bad = 0;
 for (const tier of ['safe', 'scouting', 'risky']) {
@@ -14,7 +16,7 @@ for (const tier of ['safe', 'scouting', 'risky']) {
   let ms = 0, worst = 0, mines = 0, floor = 0, guesses = 0;
   for (let seed = first; seed < first + n; seed++) {
     const t = Date.now();
-    const g = generateExpedition(tier, seed, REGION);
+    const g = generateExpedition(tier, seed, REGION, tier === 'safe' ? [] : STORY);
     const dt = Date.now() - t;
     ms += dt;
     worst = Math.max(worst, dt);

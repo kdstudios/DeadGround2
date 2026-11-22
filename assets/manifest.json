@@ -1195,6 +1195,11 @@
    "src": "sprites/mg_icon_term.png",
    "w": 34,
    "h": 34
+  },
+  "item_transmitter": {
+   "src": "sprites/item_transmitter.png",
+   "w": 64,
+   "h": 64
   }
  },
  "groups": {

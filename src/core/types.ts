@@ -20,7 +20,13 @@ export type PickupId =
   | 'shield'
   | 'medkit'
   | 'map'
-  | 'survivor';
+  | 'survivor'
+  | 'transmitter'
+  | 'researcher';
+
+/** Campaign story items. They are carried out like loot and only count if the player escapes. */
+export type StoryKey = 'transmitter' | 'researcher';
+export const STORY_KEYS: readonly StoryKey[] = ['transmitter', 'researcher'];
 
 export type InventoryKey = 'ammo' | 'key' | 'crowbar' | 'explosive' | 'map';
 export type LootKey = 'scrap' | 'food' | 'materials';
@@ -111,6 +117,8 @@ export interface Results {
   rescued: number;
   /** Carried supplies left over at the end of the run. */
   kit: Kit;
+  /** Campaign story items picked up this run (absent in results built before v22). */
+  story?: Record<StoryKey, number>;
 }
 
 /** Consumable supplies carried between the safehouse and an expedition. */

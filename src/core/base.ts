@@ -1,4 +1,6 @@
 import { CONFIG } from './config.js';
+import { migrateProgress, newProgress } from '../progress/state.js';
+import type { ProgressState } from '../progress/types.js';
 import type { Kit, Results } from './types.js';
 
 /**
@@ -25,10 +27,12 @@ export interface BaseState {
   survivors: Survivor[];
   facilities: Record<Facility, number>;
   nextSurvivorId: number;
+  /** Player level, XP, achievements and missions (added in v21). Absent in older saves; migrated on load. */
+  progress?: ProgressState;
   /** A night attack that has started but not finished (so a reload resumes the same night). */
   pendingNight?: { seed: number } | null;
   /** An expedition in progress: the map is regenerated from its seed, then the snapshot is put back on it. */
-  expedition?: { difficulty: 'safe' | 'scouting' | 'risky'; seed: number; region: string; snap: unknown } | null;
+  expedition?: { difficulty: 'safe' | 'scouting' | 'risky'; seed: number; region: string; snap: unknown; /** Unique id of the run, so its rewards are paid once (added in v21). */ runId?: string; /** Story items this map was generated with (v22), so a resumed run rebuilds the same map. */ story?: ('transmitter' | 'researcher')[] } | null;
 }
 
 export const ROLES: Record<Role, { label: string; perk: string }> = {
@@ -103,6 +107,7 @@ export function newBase(): BaseState {
     survivors: [],
     facilities: { storage: 0, garden: 0, workshop: 0, radio: 0, armoury: 0, barricades: 0, watchtower: 0 },
     nextSurvivorId: 1,
+    progress: newProgress(),
   };
 }
 
@@ -253,7 +258,10 @@ export function deserialize(text: string | null): BaseState | null {
     const o = JSON.parse(text) as BaseState;
     if (o.version !== 1 || typeof o.day !== 'number' || !o.stock || !o.kit || !o.facilities || !Array.isArray(o.survivors)) return null;
     const base = newBase();
-    return { ...base, ...o, stock: { ...base.stock, ...o.stock }, kit: { ...base.kit, ...o.kit }, facilities: { ...base.facilities, ...o.facilities } };
+    const merged: BaseState = { ...base, ...o, stock: { ...base.stock, ...o.stock }, kit: { ...base.kit, ...o.kit }, facilities: { ...base.facilities, ...o.facilities } };
+    // progression block: missing (a v20 save), older, or damaged data is migrated / repaired here, never discarded
+    merged.progress = migrateProgress((o as { progress?: unknown }).progress, merged);
+    return merged;
   } catch {
     return null;
   }

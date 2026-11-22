@@ -9,6 +9,7 @@ import type { Cell, ObjectId, PickupId, Pos } from '../core/types.js';
  *   D  locked door    X  cracked wall (explosive)
  *   s  scrap  f  food  t  materials  a  ammo  k  key  c  crowbar
  *   e  explosive  h  medkit  p  protective shield  r  map fragment  v  survivor to rescue
+ *   T  radio transmitter (story)  Q  research-team member (story)
  */
 const OBJECT_CHARS: Record<string, ObjectId> = {
   m: 'mine',
@@ -31,6 +32,8 @@ const PICKUP_CHARS: Record<string, PickupId> = {
   p: 'shield',
   r: 'map',
   v: 'survivor',
+  T: 'transmitter',
+  Q: 'researcher',
 };
 
 export interface AsciiLevel {

@@ -3,7 +3,7 @@
 *Minesweeper Adventure meets the zombie apocalypse.* Explore a fog-covered grid, read the
 numbers, dodge hidden mines, shoot zombies, open doors, and find the open manhole.
 
-**Status: Phase 5 — content and polish (in progress)**.
+**Status: v22 — Campaign story items** (on v21 Progression) (on top of Phase 5 content and polish).
 
 ## Run it
 
@@ -69,7 +69,8 @@ src/core/      Pure game rules - no DOM, fully unit-tested
   pathfind.ts    BFS pathfinder
 src/levels/    ASCII level format + the hand-built expedition
 src/render/    Canvas renderer + sprite lookup (reads core state, never changes it)
-src/ui/        DOM HUD
+src/ui/        DOM HUD, safehouse, missions, profile, notices
+src/progress/  Player level, achievements, missions (pure TS, no DOM, unit-tested)
 src/main.ts    game loop, input, menus
 assets/        sprites/ + manifest.json + style.css
 art/atlas2/    your atlas sheets (source for tools/build_sprites.py)
@@ -229,3 +230,38 @@ Only the two minigames (rules, physics and art) were taken from the other game; 
 ## UI overhaul (v20)
 
 The whole interface now uses the *Post-Apocalyptic Military UI Kit*. Pieces are sliced into `assets/ui/` and applied with CSS `border-image` (9-slice), so panels and buttons stretch to any screen. To re-skin, replace a PNG there (same name). Fonts (Anton + Roboto, both OFL) are bundled in `assets/fonts/`. Facility card icons are set in `src/ui/art.ts`. The safehouse follows the concept art; browser `confirm()` popups are replaced by an in-game dialog.
+
+## v21 — Progression
+
+A persistent progression layer sits on top of the existing game. It never changes gameplay rules; it only listens.
+
+```
+src/progress/
+  config.ts           XP rewards, level curve, mission counts, anti-exploit limits (all balance numbers)
+  achievementDefs.ts  the achievements (data only)
+  missionDefs.ts      daily / weekly pools and the campaign chain (data only)
+  service.ts          ProgressionService: the one place that receives gameplay events
+  state.ts            save block shape, sanitising, v20 -> v21 migration
+  time.ts, xp.ts      UTC day/week periods, level maths
+src/ui/missions.ts, profile.ts, notices.ts   the Operations screen, Operator profile, non-blocking pop-ups
+```
+
+* **Events in, state out.** `main.ts` reports `expeditionEnded`, `zombieKilled`, `vaultOpened`, `nightEnded`, `facilityUpgraded`
+  and `dayReached`. Events that carry an id (a run, a vault, a night) are processed once, even across reloads.
+* **Where to tune:** XP and the curve are in `config.ts`; add an achievement or mission by appending an entry to the defs files.
+* **Saves:** progression is an optional `progress` block inside the existing save (same key, same save code). Old saves are
+  migrated on load; damaged blocks are repaired field by field. See `state.ts`.
+* **Daily/weekly missions** are generated locally from the UTC date (no server). The effective clock never moves backwards.
+* Quick Play and the hand-built test map never touch progression.
+
+## v22 — Campaign story items
+
+The campaign steps "Dead Air" and "Missing Persons" now use real pickups instead of stand-in objectives:
+
+* **Radio transmitter** (`T` in ASCII, sprite `item_transmitter`) and **research-team member** (`Q`). A researcher is rescued like any
+  survivor (and joins the safehouse) and also counts for the campaign.
+* While a campaign step needs one, `ProgressionService.storyItemsFor(difficulty)` asks the generator to include it:
+  exactly one inside a building, Scouting and Risky maps only. The map is regenerated from the same seed *and* story list when a run
+  is resumed (stored in `base.expedition.story`). The solver treats them as ordinary pickups, so maps stay guess-free and complete.
+* Items only count if you escape. Save block version is now 2: unfinished transmitter/research steps from v21 restart at 0.
+* Validate story maps with `STORY=1 node tools/validate.mjs 60 1 forest`.

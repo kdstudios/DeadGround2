@@ -1,6 +1,6 @@
 {
   "name": "deadground",
-  "version": "0.11.0",
+  "version": "0.22.0",
   "private": true,
   "description": "DeadGround - Minesweeper Adventure meets a zombie apocalypse",
   "type": "module",

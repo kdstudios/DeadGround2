@@ -69,6 +69,7 @@
       <h2>Choose your run</h2>
       <div id="c-regions" class="regs"></div>
       <p id="c-region-note" class="small"></p>
+      <p id="c-story" class="small xp-line" hidden></p>
       <p id="c-stamina" class="sub">Every expedition is a freshly generated map. Harder runs pay more loot.</p>
       <button class="big diff" data-diff="safe" data-cost="1">Safe<small>Easy &middot; a small yard and one house, no patrols</small></button>
       <button class="big diff" data-diff="scouting" data-cost="2">Scouting<small>Normal &middot; bigger wasteland, a fence, two houses with rooms, a SWAT patrol</small></button>
@@ -102,6 +103,7 @@
         <tr><td>Materials</td><td id="r-materials"></td></tr>
       </table></div>
       <p id="r-extra" class="sub"></p>
+      <p id="r-xp" class="sub xp-line" hidden></p>
       <button id="r-again" class="big"></button>
       <button id="r-menu" class="big ghost">Main menu</button>
     </div>
@@ -164,6 +166,12 @@
 
   <!-- Safehouse hub -->
   <div id="safehouse" class="screen scroll" hidden></div>
+
+  <!-- Progression: missions and operator profile -->
+  <div id="missions" class="screen scroll" hidden></div>
+  <div id="profile" class="screen scroll" hidden></div>
+  <!-- Non-blocking progression notices (level-ups, achievements, missions) -->
+  <div id="notices" aria-live="polite"></div>
 
   <!-- Night defence HUD -->
   <div id="nhud" hidden>

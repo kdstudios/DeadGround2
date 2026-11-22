@@ -33,6 +33,8 @@ const PICKUP_SPRITE: Record<PickupId, string> = {
   medkit: 'item_medkit',
   map: 'item_map',
   survivor: 'player_down_0',
+  transmitter: 'item_transmitter',
+  researcher: 'player_down_0',
 };
 
 const PICKUP_LABEL: Record<PickupId, string> = {
@@ -47,6 +49,8 @@ const PICKUP_LABEL: Record<PickupId, string> = {
   medkit: 'health',
   map: 'map',
   survivor: 'survivor rescued',
+  transmitter: 'transmitter secured',
+  researcher: 'researcher found',
 };
 
 const FADE_SECONDS = 0.28;

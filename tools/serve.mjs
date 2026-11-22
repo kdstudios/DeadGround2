@@ -17,6 +17,8 @@ const types = {
   '.png': 'image/png',
   '.map': 'application/json',
   '.svg': 'image/svg+xml',
+  '.ttf': 'font/ttf',
+  '.woff2': 'font/woff2',
 };
 
 export function startServer(p = port) {

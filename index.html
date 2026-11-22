@@ -15,9 +15,9 @@
   <!-- In-expedition HUD -->
   <div id="hud" hidden>
     <div id="topbar">
-      <button id="btn-menu" class="chip" title="Menu (Esc)">&#9776; Menu</button>
+      <button id="btn-menu" class="chip menu-btn" title="Menu (Esc)" aria-label="Menu">Menu</button>
       <div id="level-name" class="chip"></div>
-      <button id="btn-restart" class="chip" title="Restart expedition">&#8635;</button>
+      <button id="btn-restart" class="chip" title="Restart expedition" aria-label="Restart">&#8635;</button>
     </div>
     <div id="toast"></div>
     <div id="bottombar">
@@ -44,20 +44,25 @@
   </div>
 
   <!-- Main menu -->
-  <div id="menu" class="screen">
-    <div class="card">
-      <h1>DEAD<span>GROUND</span></h1>
-      <p class="sub">Minesweeper Adventure meets the zombie apocalypse</p>
-      <button id="m-new" class="big">New Game</button>
-      <button id="m-continue" class="big" disabled>Continue</button>
-      <button id="m-load" class="big">Load Game</button>
-      <button id="m-quick" class="big">Quick Play</button>
-      <button id="m-how" class="big ghost">How to play</button>
-      <button id="m-options" class="big">Options</button>
+  <div id="menu" class="screen menu">
+    <div class="deco l"><img src="assets/ui/lantern.png" alt="" /></div>
+    <div class="deco r"><img src="assets/ui/banner.png" alt="" /></div>
+    <div class="menu-col">
+      <h1 class="logo">DEAD<span>GROUND</span></h1>
+      <p class="tagline">Minesweeper Adventure meets the zombie apocalypse</p>
+      <div class="plate menu-plate">
+        <button id="m-new" class="big">New Game</button>
+        <button id="m-continue" class="big" disabled>Continue</button>
+        <button id="m-load" class="big ghost">Load Game</button>
+        <button id="m-quick" class="big ghost">Quick Play</button>
+        <button id="m-how" class="big ghost">How to play</button>
+        <button id="m-options" class="big ghost">Options</button>
+      </div>
       <p class="small">Your game saves automatically on this device.</p>
     </div>
   </div>
 
+  
   <!-- Choose an expedition -->
   <div id="choose" class="screen" hidden>
     <div class="card">
@@ -86,19 +91,19 @@
 
   <!-- Expedition results -->
   <div id="results" class="screen" hidden>
-    <div class="card parchment">
+    <div class="card">
       <h2 id="r-title"></h2>
       <p id="r-sub" class="sub"></p>
-      <table>
+      <div class="paper stats"><table>
         <tr><td>Time</td><td id="r-time"></td></tr>
         <tr><td>Hearts left</td><td id="r-hearts"></td></tr>
         <tr><td>Scrap</td><td id="r-scrap"></td></tr>
         <tr><td>Food</td><td id="r-food"></td></tr>
         <tr><td>Materials</td><td id="r-materials"></td></tr>
-      </table>
+      </table></div>
       <p id="r-extra" class="sub"></p>
       <button id="r-again" class="big"></button>
-      <button id="r-menu" class="big">Main menu</button>
+      <button id="r-menu" class="big ghost">Main menu</button>
     </div>
   </div>
 
@@ -118,8 +123,8 @@
   </div>
 
   <!-- How to play -->
-  <div id="how" class="screen scroll" hidden>
-    <div class="sh-wrap how">
+  <div id="how" class="screen" hidden>
+    <div class="card wide how">
       <h2>How to play</h2>
       <h3>Expeditions</h3>
       <ul>
@@ -179,6 +184,18 @@
       <h2 id="n-title"></h2>
       <p id="n-body" class="sub"></p>
       <button id="n-ok" class="big">Wake up</button>
+    </div>
+  </div>
+
+  <!-- Confirm dialog (replaces the browser's confirm()) -->
+  <div id="confirm" class="screen modal" hidden>
+    <div class="card">
+      <h2 id="cf-title">Are you sure?</h2>
+      <p id="cf-text" class="sub"></p>
+      <div class="row">
+        <button id="cf-no" class="big ghost">Cancel</button>
+        <button id="cf-yes" class="big">Confirm</button>
+      </div>
     </div>
   </div>
 

@@ -58,6 +58,31 @@ class Game {
   private nightRenderer: NightRenderer;
   private minigames: MinigameOverlay;
   private nightDone = false;
+  /** True while a dialog is open over an expedition: the world stands still. */
+  private paused = false;
+  private confirmResolve: ((ok: boolean) => void) | null = null;
+
+  /** Themed replacement for window.confirm(). Resolves true on confirm. */
+  confirmDialog(title: string, text: string, yes = 'Confirm', no = 'Cancel'): Promise<boolean> {
+    this.confirmResolve?.(false);
+    $('cf-title').textContent = title;
+    $('cf-text').textContent = text;
+    $('cf-yes').textContent = yes;
+    $('cf-no').textContent = no;
+    $('confirm').hidden = false;
+    this.paused = true;
+    return new Promise((resolve) => {
+      this.confirmResolve = resolve;
+    });
+  }
+
+  private closeConfirm(ok: boolean): void {
+    $('confirm').hidden = true;
+    this.paused = false;
+    const r = this.confirmResolve;
+    this.confirmResolve = null;
+    r?.(ok);
+  }
 
   constructor(
     private canvas: HTMLCanvasElement,
@@ -343,11 +368,12 @@ class Game {
   }
 
   /** Leave an expedition for the safehouse; if it is not over, this counts as a failed run. */
-  private abandon(): void {
+  private async abandon(): Promise<void> {
     const l = this.level;
     if (this.run.kind !== 'gen') return this.showMenu(); // practice runs cost nothing to leave
     if (l && this.base && l.status === 'playing') {
-      if (!window.confirm('Abandon this expedition? Everything you found is lost.')) return;
+      if (!(await this.confirmDialog('Abandon expedition?', 'Everything you found is lost, and the stamina is still spent.', 'Abandon', 'Keep going'))) return;
+      if (this.level !== l || l.status !== 'playing' || !this.base) return;
       this.base.expedition = null;
       returnHome(this.base, { ...l.results(), status: 'failed' });
       this.persist();
@@ -384,7 +410,7 @@ class Game {
     if (level) {
       this.measureHud();
       this.autosaveExpedition(dt);
-      level.update(dt);
+      if (!this.paused) level.update(dt);
       const events = level.drainEvents();
       this.renderer.handleEvents(level, events);
       this.playEvents(events);
@@ -567,11 +593,15 @@ class Game {
     });
 
     window.addEventListener('keydown', (e) => {
+      if (this.confirmResolve) {
+        if (e.key === 'Escape') this.closeConfirm(false);
+        return;
+      }
       const l = this.level;
       if (!l) return;
       if (e.key === 'Escape') {
         if (l.pending) l.cancelUse();
-        else this.abandon();
+        else void this.abandon();
       } else if (e.key === 'f' || e.key === 'F') this.toggleFlagMode();
       else if (e.key === 'b' || e.key === 'B') l.pressItem('explosive');
       else if (e.key === 'm' || e.key === 'M') l.pressItem('map');
@@ -584,8 +614,10 @@ class Game {
   }
 
   private bindUi(): void {
-    $('m-new').addEventListener('click', () => {
-      if (this.base && !window.confirm('Start a new game? Your saved safehouse will be erased.')) return;
+    $('cf-yes').addEventListener('click', () => this.closeConfirm(true));
+    $('cf-no').addEventListener('click', () => this.closeConfirm(false));
+    $('m-new').addEventListener('click', async () => {
+      if (this.base && !(await this.confirmDialog('Start a new game?', 'Your saved safehouse will be erased.', 'Erase and start'))) return;
       this.base = newBase();
       this.persist();
       this.showSafehouse();
@@ -622,7 +654,7 @@ class Game {
         () => ($('l-msg').textContent = 'Select the code above and copy it.'),
       );
     });
-    $('l-import').addEventListener('click', () => {
+    $('l-import').addEventListener('click', async () => {
       const text = ($('l-code') as HTMLTextAreaElement).value.trim();
       let b: BaseState | null = null;
       try {
@@ -631,7 +663,7 @@ class Game {
         b = null;
       }
       if (!b) return void ($('l-msg').textContent = 'That code is not a valid save.');
-      if (this.base && !window.confirm('Replace your current saved game with this one?')) return;
+      if (this.base && !(await this.confirmDialog('Replace your save?', 'Your current saved game will be overwritten by this code.', 'Replace'))) return;
       this.base = b;
       this.persist();
       this.showSafehouse();
@@ -685,7 +717,7 @@ class Game {
       localStorage.removeItem('deadground.hometips');
       ($('o-reset-tips') as HTMLButtonElement).textContent = 'Tips will show again ✓';
     });
-    $('btn-menu').addEventListener('click', () => this.abandon());
+    $('btn-menu').addEventListener('click', () => void this.abandon());
     $('btn-restart').addEventListener('click', () => this.start());
     $('r-again').addEventListener('click', () => {
       // After a win, roll a new map of the same difficulty; after a loss, retry the same one.

@@ -47,8 +47,8 @@ export const FACILITIES: Record<Facility, { label: string; blurb: string; max: n
   workshop: { label: 'Workshop', blurb: 'Craft supplies for expeditions. Upgrades make crafting cheaper.', max: 3, levelNote: (l) => (l === 0 ? 'Not built' : l === 1 ? 'Standard crafting prices' : `Crafting −${l - 1} scrap`) },
   radio: { label: 'Radio', blurb: 'Scouts ahead: you set out with free map fragments.', max: 3, levelNote: (l) => (l === 0 ? 'Silent' : `${l} free map fragment${l === 1 ? '' : 's'} per expedition`) },
   armoury: { label: 'Armoury', blurb: 'Better bows: arrows fly faster and hit harder at night.', max: 3, levelNote: (l) => (l === 0 ? 'Plain bows' : `Fire rate +${l * 25}%, damage +${l}`) },
-  barricades: { label: 'Barricades', blurb: 'Stronger walls for night attacks (used once night defence arrives).', max: 3, levelNote: (l) => `Level ${l}` },
-  watchtower: { label: 'Watchtower', blurb: 'Early warning of night attacks (used once night defence arrives).', max: 3, levelNote: (l) => `Level ${l}` },
+  barricades: { label: 'Barricades', blurb: 'Stronger gates to hold back the night attacks.', max: 3, levelNote: (l) => `Level ${l}` },
+  watchtower: { label: 'Watchtower', blurb: 'More archer towers, and longer range, for night defence.', max: 3, levelNote: (l) => `Level ${l}` },
 };
 
 export const storageCap = (lvl: number): number => [30, 60, 100, 160][Math.min(3, lvl)]!;

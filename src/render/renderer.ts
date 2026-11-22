@@ -51,6 +51,9 @@ const PICKUP_LABEL: Record<PickupId, string> = {
 
 const FADE_SECONDS = 0.28;
 
+/** Crumble some fence tiles into short stumps. Off: it left gaps in the wall line that read as holes. */
+const JAGGED_FENCE = false;
+
 export class Renderer {
   private ctx: CanvasRenderingContext2D;
   private cssW = 0;
@@ -413,6 +416,7 @@ export class Renderer {
 
   /** Deterministic 0..0.55: how much of a fence cell's top has crumbled away (0 = intact). */
   private fenceBreak(x: number, y: number): number {
+    if (!JAGGED_FENCE) return 0;
     const h = Math.sin(x * 127.1 + y * 311.7) * 43758.5453;
     const f = h - Math.floor(h);
     return f < 0.4 ? 0 : 0.15 + (f - 0.4) * 0.67;

@@ -35,22 +35,6 @@ const RES_ICON: Record<string, string> = { scrap: 'item_scrap', food: 'item_food
 const costHtml = (c: Cost): string =>
   (Object.entries(c) as [string, number][]).map(([k, v]) => `<span class="cost" title="${k}">${icon(RES_ICON[k] ?? 'item_scrap')}${v}</span>`).join('');
 
-const LINES: [string, string][] = [
-  ["Tremble, but work through it. We'll make it.", 'Your safehouse is a place to recover, plan and prepare for what’s next.'],
-  ['Check the walls before you check the horizon.', 'Everything out there wants in. Everything in here is worth keeping.'],
-  ['Scrap today, walls tomorrow.', 'Every piece you bring home is one less gap in the barricade.'],
-  ['Stay quiet. Stay fed. Stay alive.', 'The wasteland rewards the careful and buries the brave.'],
-  ['Read the numbers twice.', 'A clue is only as good as the nerve it takes to trust it.'],
-];
-
-/** The survivor's line under the header: reacts to the state of the base, otherwise rotates by day. */
-function advice(s: BaseState, nights: number, canGo: boolean): [string, string] {
-  if (nights < 1) return ["We’re almost out of food.", 'Bring some home or the hungry will leave in the dark. Keep the garden growing.'];
-  if (!canGo) return ['Nothing left in the tank.', 'Rest until night. The barricades need us more than the wasteland does today.'];
-  if (s.survivors.length === 0 && s.day > 2) return ['It’s quiet. Too quiet.', 'Buildings on Scouting and Risky runs hide survivors who need rescuing.'];
-  return LINES[(s.day - 1) % LINES.length]!;
-}
-
 /** Re-render the safehouse hub from the saved state. */
 export function renderSafehouse(root: HTMLElement, s: BaseState, act: SafehouseActions): void {
   const cap = storageCap(s.facilities.storage);
@@ -59,7 +43,6 @@ export function renderSafehouse(root: HTMLElement, s: BaseState, act: SafehouseA
   const cheapest = Math.min(...Object.values(EXPEDITION_COST));
   const canGo = s.stamina >= cheapest;
   const pips = Array.from({ length: STAMINA_PER_DAY }, (_, i) => `<i class="${i < s.stamina ? (s.stamina <= 2 ? 'low' : 'on') : ''}"></i>`).join('');
-  const [line, sub] = advice(s, nights, canGo);
 
   const facilityCards = (Object.keys(FACILITIES) as Facility[])
     .map((f) => {
@@ -102,10 +85,10 @@ export function renderSafehouse(root: HTMLElement, s: BaseState, act: SafehouseA
 
   root.innerHTML = `
   <div class="sh">
-    <aside class="sh-left"><img class="lantern" src="assets/ui/lantern.png" alt=""><div class="banner-wrap"><img class="banner" src="assets/ui/banner.png" alt=""></div></aside>
+    <aside class="sh-left"><div class="banner-wrap"><img class="banner" src="assets/ui/banner.png" alt=""></div></aside>
 
     <header class="hdr">
-      <i class="hdr-l"></i>
+      <i class="hdr-l"></i><i class="hdr-badge"></i>
       <div class="hdr-m">
         <div class="hdr-t"><h2>Safehouse</h2><p>Day <b>${s.day}</b> &middot; Stay safe, survivor.</p></div>
         <div class="stam" title="Stamina: ${s.stamina} / ${STAMINA_PER_DAY}"><span>Stamina</span>${pips}</div>
@@ -116,25 +99,28 @@ export function renderSafehouse(root: HTMLElement, s: BaseState, act: SafehouseA
 
     <div class="sh-res">${resChip('scrap', 'Scrap')}${resChip('food', 'Food')}${resChip('materials', 'Materials')}</div>
 
+    <div class="sh-go">
+        <button class="cta" id="sh-exp" ${canGo ? '' : 'disabled'}><span><span class="cta-t">Go on an expedition</span><small>Risk it all for valuable supplies.</small></span></button>
+        <button class="pill-btn" id="sh-sleep">${canGo ? 'Rest until night' : 'Night falls — sleep'}</button>
+    </div>
+
     <aside class="sh-brief">
       <div class="side plate">
         <h3 class="plate-h">Daily brief</h3>
         <div class="brief-rows">
           <div class="brief-row"><span>Stamina</span><b>${s.stamina} / ${STAMINA_PER_DAY}</b></div>
-          <div class="brief-row ${nights < 1 ? 'warn' : ''}"><span>Tonight everyone eats</span><b>${need} food</b></div>
-          <div class="brief-row ${nights < 1 ? 'warn' : ''}"><span>Food lasts about</span><b>${nights} night${nights === 1 ? '' : 's'}</b></div>
-          <div class="brief-row"><span>Safehouse</span><b>${1 + s.survivors.length} survivor${s.survivors.length ? 's' : ''}</b></div>
+          <div class="brief-row ${nights < 1 ? 'warn' : ''}"><span>Eaten tonight</span><b>${need} food</b></div>
+          <div class="brief-row ${nights < 1 ? 'warn' : ''}"><span>Food lasts</span><b>${nights} night${nights === 1 ? '' : 's'}</b></div>
+          <div class="brief-row"><span>Population</span><b>${1 + s.survivors.length}</b></div>
           <div class="brief-h">Packed for next expedition</div>
           <div class="kit" title="Packed for the next expedition">
             ${(['ammo', 'explosive', 'shield', 'map'] as const).map((k) => `<span title="${k}">${icon('item_' + k)}<b>${s.kit[k]}</b></span>`).join('')}
           </div>
         </div>
       </div>
-      <img class="radio" src="assets/ui/radio.png" alt="">
     </aside>
 
     <div class="sh-note">
-      <div class="strip"><b>${line}</b><i>${sub}</i></div>
       ${act.tips ? `<div class="paper tipbox"><b>How the safehouse works</b>
         <ul><li>Each day you have <b>stamina</b>: Safe costs 1, Scouting 2, Risky 3. Harder runs pay more.</li>
         <li>Escape with loot to bank it; die and you lose what you found. Rescue survivors for passive perks.</li>
@@ -150,10 +136,6 @@ export function renderSafehouse(root: HTMLElement, s: BaseState, act: SafehouseA
       </div>
       <h3 class="sec">Facilities</h3>
       <div class="facs">${facilityCards}</div>
-      <div class="sh-go">
-        <button class="cta" id="sh-exp" ${canGo ? '' : 'disabled'}><span><span class="cta-t">Go on an expedition</span><small>Risk it all for valuable supplies.</small></span></button>
-        <button class="pill-btn" id="sh-sleep">${canGo ? 'Rest until night' : 'Night falls — sleep'}</button>
-      </div>
     </div>
   </div>`;
 

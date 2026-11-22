@@ -226,6 +226,6 @@ Only the two minigames (rules, physics and art) were taken from the other game; 
 - Ground outside the map boundary is edge-blended like the playable floor.
 
 
-## UI overhaul (v18)
+## UI overhaul (v20)
 
 The whole interface now uses the *Post-Apocalyptic Military UI Kit*. Pieces are sliced into `assets/ui/` and applied with CSS `border-image` (9-slice), so panels and buttons stretch to any screen. To re-skin, replace a PNG there (same name). Fonts (Anton + Roboto, both OFL) are bundled in `assets/fonts/`. Facility card icons are set in `src/ui/art.ts`. The safehouse follows the concept art; browser `confirm()` popups are replaced by an in-game dialog.
